@@ -1,0 +1,11 @@
+{
+  "name": "smort-home",
+  "version": "0.0.1",
+  "description": "For the smortest homes only",
+  "main": "index.js",
+  "license": "MIT",
+  "packageManager": "yarn@4.5.0",
+  "workspaces": [
+    "smort-home-server"
+  ]
+}

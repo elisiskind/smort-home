@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
-import { lightsSchema } from './schema';
+import { lightsSchema } from './hue.schema';
+import EventSource = require('eventsource');
 
 @Injectable()
 export class HueClient {
   private readonly baseUrl: string;
+  private readonly eventBaseUrl: string;
   private readonly clientKey: string;
 
   private readonly username: string;
@@ -14,6 +16,7 @@ export class HueClient {
     this.clientKey = envService.get('HUE_BRIDGE_CLIENT_KEY');
     this.username = envService.get('HUE_BRIDGE_USER');
     this.baseUrl = `${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/clip/v2`;
+    this.eventBaseUrl = `https://${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/eventstream/clip/v2`;
   }
 
   async getLights() {
@@ -25,6 +28,19 @@ export class HueClient {
       method: 'PUT',
       body: `{"on": {"on": ${on}}}`,
     });
+  }
+
+  listen(onEvent: (event: unknown) => void) {
+    const source = new EventSource(this.eventBaseUrl, {
+      headers: {
+        Accept: 'text/event-stream',
+        'hue-application-key': this.username,
+      },
+      https: {
+        rejectUnauthorized: false,
+      },
+    });
+    source.addEventListener('message', onEvent);
   }
 
   private async request(

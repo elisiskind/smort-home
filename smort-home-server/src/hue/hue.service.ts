@@ -3,19 +3,19 @@ import { HueClient } from './hue.client';
 
 @Injectable()
 export class HueService {
-  constructor(private readonly hueClient: HueClient) {}
+  constructor(private readonly hueClient: HueClient) {
+    this.subscribe();
+  }
 
-  async listAll() {
+  async getLights() {
     return this.hueClient.getLights();
   }
 
-  async turnOffLight() {
-    const lights = await this.listAll();
-    const livingRoomLights = lights.filter((light) =>
-      ['Twinkle Lights', 'Table Lamp', 'Standing Lamp'].includes(light.name),
-    );
-    livingRoomLights.forEach((light) => {
-      this.hueClient.setLight(light.id, !light.on);
-    });
+  async updateLight(id: string, on: boolean) {
+    await this.hueClient.setLight(id, on);
+  }
+
+  subscribe() {
+    this.hueClient.listen((event) => console.log('Received event! ', event));
   }
 }

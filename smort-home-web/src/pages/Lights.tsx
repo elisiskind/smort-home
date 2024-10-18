@@ -1,15 +1,26 @@
-import { useGetLightsQuery, useUpdateLightMutation } from '../api/api';
+import { useUpdateLightMutation } from '../api/api';
 import { Box, Button, CircularProgress } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
+import { useCollection } from 'react-firebase-hooks/firestore';
+import { lightsSchema } from '../api/schema';
+import { firestore } from '../firebase';
+import { collection } from 'firebase/firestore';
 
 export const Lights = () => {
-  const result = useGetLightsQuery();
   const [updateLight] = useUpdateLightMutation();
+  const [lightsResult, loading, error] = useCollection(
+    collection(firestore, 'home-state/hue/lights'),
+  );
 
-  if (result.isSuccess) {
+  if (lightsResult) {
+    const data = lightsResult.docs.map((doc) => doc.data());
+    console.error(data);
+    const lights = lightsSchema.parse(
+      lightsResult.docs.map((light) => light.data()),
+    );
     return (
       <Grid container spacing={2}>
-        {result.data.map((light) => (
+        {lights.map((light) => (
           <Grid xs={6} sm={4} key={light.id}>
             <Button
               fullWidth
@@ -24,8 +35,8 @@ export const Lights = () => {
         ))}
       </Grid>
     );
-  } else if (result.isError) {
-    return <Box>{JSON.stringify(result.error)}</Box>;
+  } else if (error) {
+    return <Box>{error.message}</Box>;
   } else {
     return <CircularProgress />;
   }

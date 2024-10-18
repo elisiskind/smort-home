@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EnvModule } from './env/env.module';
 import { envSchema } from './env/env';
 import { HueModule } from './hue/hue.module';
+import { FirestoreModule } from './firestore/firestore.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { HueModule } from './hue/hue.module';
     }),
     EnvModule,
     HueModule,
+    FirestoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],

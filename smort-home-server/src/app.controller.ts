@@ -22,6 +22,6 @@ export class AppController {
 
   @Post('light/:id')
   updateLight(@Param('id') id: string, @Body() lightStatus: LightStatus) {
-    return this.hueService.updateLight(id, lightStatus.on);
+    return this.hueService.setLight(id, lightStatus.on);
   }
 }

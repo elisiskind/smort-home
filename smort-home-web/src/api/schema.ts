@@ -1,10 +1,10 @@
-import {z} from "zod";
+import { z } from 'zod';
 
 export const lightSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    on: z.boolean(),
-})
+  id: z.string(),
+  name: z.string(),
+  on: z.boolean(),
+});
 
 export const lightsSchema = z.array(lightSchema);
 

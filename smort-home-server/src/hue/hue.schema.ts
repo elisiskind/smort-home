@@ -54,15 +54,14 @@ const lightSchema = lightInputSchema
   }))
   .readonly();
 
-const lightUpdateSchema = lightInputSchema
+export const lightUpdateSchema = lightInputSchema
   .partial()
   .extend({
     id: z.string(),
   })
   .transform(({ metadata, color_temperature, ...light }) => ({
     ...light,
-    colorTemperature: color_temperature,
-    name: metadata?.name,
+    colorTemperature: color_temperature ?? null,
     id: light.id as string,
   }));
 

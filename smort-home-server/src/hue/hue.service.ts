@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
-import { lightsSchema, LightUpdate } from './hue.schema';
+import { lightsSchema, LightUpdate, lightUpdateSchema } from './hue.schema';
+import { z } from 'zod';
 import EventSource = require('eventsource');
 
 @Injectable()
@@ -23,7 +24,6 @@ export class HueService implements OnModuleDestroy {
 
   async getLights() {
     const response = await this.request('resource/light');
-    console.log(response);
     return lightsSchema.parse(response);
   }
 
@@ -46,8 +46,23 @@ export class HueService implements OnModuleDestroy {
         },
       });
     }
-    const listener = (message) => {
+    const listener = (message: MessageEvent) => {
       console.log(message);
+      const parsed = z
+        .array(
+          z
+            .object({
+              data: z.array(z.object({ type: z.string() }).passthrough()),
+            })
+            .transform((data) => data.data),
+        )
+        .parse(JSON.parse(message.data));
+
+      parsed
+        .flatMap((data) => data)
+        .filter((data) => data.type === 'light')
+        .map((data) => lightUpdateSchema.parse(data))
+        .forEach((update) => onEvent(update));
     };
     this.eventSource.addEventListener('message', listener);
     return () => this.eventSource.removeEventListener('message', listener);

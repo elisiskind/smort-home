@@ -11,7 +11,6 @@ export class FirestoreService {
   private readonly db: Firestore;
 
   constructor() {
-    console.log('Initializing app!');
     initializeApp({
       credential: applicationDefault(),
     });
@@ -30,6 +29,7 @@ export class FirestoreService {
     await this.lightsCollection().doc(light.id).update(light);
   }
 
-  private readonly lightsCollection = () =>
-    this.db.collection('home-state/hue/lights');
+  private lightsCollection() {
+    return this.db.collection('home-state/hue/lights');
+  }
 }

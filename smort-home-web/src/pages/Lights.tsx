@@ -13,8 +13,6 @@ export const Lights = () => {
   );
 
   if (lightsResult) {
-    const data = lightsResult.docs.map((doc) => doc.data());
-    console.error(data);
     const lights = lightsSchema.parse(
       lightsResult.docs.map((light) => light.data()),
     );

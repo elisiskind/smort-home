@@ -12,6 +12,8 @@ export class AppService implements OnModuleInit {
   async onModuleInit() {
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
-    this.hueService.listen(this.firestoreService.updateLight);
+    this.hueService.listen((update) =>
+      this.firestoreService.updateLight(update),
+    );
   }
 }

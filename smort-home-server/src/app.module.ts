@@ -6,6 +6,7 @@ import { EnvModule } from './env/env.module';
 import { envSchema } from './env/env';
 import { HueModule } from './hue/hue.module';
 import { FirestoreModule } from './firestore/firestore.module';
+import { SonosModule } from './sonos/sonos.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FirestoreModule } from './firestore/firestore.module';
     EnvModule,
     HueModule,
     FirestoreModule,
+    SonosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

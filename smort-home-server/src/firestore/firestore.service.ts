@@ -5,6 +5,7 @@ import {
   Light as HueLight,
   LightUpdate as HueLightUpdate,
 } from '../hue/hue.schema';
+import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
@@ -29,7 +30,25 @@ export class FirestoreService {
     await this.lightsCollection().doc(light.id).update(light);
   }
 
+  async updateSonosDevices(sonosDevices: SonosDevice[]) {
+    const batch = this.db.batch();
+    sonosDevices.forEach((sonosDevice) => {
+      batch.set(this.sonosDevicesCollection().doc(sonosDevice.id), sonosDevice);
+    });
+    await batch.commit();
+  }
+
+  async updateSonosDevice(sonosDeviceUpdate: SonosDeviceUpdate) {
+    await this.sonosDevicesCollection()
+      .doc(sonosDeviceUpdate.id)
+      .update(sonosDeviceUpdate);
+  }
+
   private lightsCollection() {
     return this.db.collection('home-state/hue/lights');
+  }
+
+  private sonosDevicesCollection() {
+    return this.db.collection('home-state/sonos/devices');
   }
 }

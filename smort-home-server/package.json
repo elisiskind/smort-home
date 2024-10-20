@@ -23,6 +23,7 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@svrooij/sonos": "^2.5.0",
     "@types/eventsource": "^1.1.15",
     "eventsource": "^2.0.2",
     "firebase-admin": "^12.6.0",

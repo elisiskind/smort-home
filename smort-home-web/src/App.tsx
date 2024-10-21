@@ -1,5 +1,6 @@
 import { Box, Stack, Tab, tabClasses, TabList, TabPanel, Tabs } from '@mui/joy';
 import { Lights } from './pages/Lights';
+import { SonosDevices } from './pages/SonosDevices';
 
 export const App = () => {
   return (
@@ -29,13 +30,15 @@ export const App = () => {
           }}
         >
           <Tab disableIndicator>Lights</Tab>
-          <Tab disableIndicator>Switches</Tab>
+          <Tab disableIndicator>Speakers</Tab>
           <Tab disableIndicator>Automations</Tab>
         </TabList>
         <TabPanel value={0}>
           <Lights />
         </TabPanel>
-        <TabPanel value={1}>Coming soon...</TabPanel>
+        <TabPanel value={1}>
+          <SonosDevices />
+        </TabPanel>
         <TabPanel value={2}>Coming soon...</TabPanel>
       </Tabs>
     </Stack>

@@ -13,6 +13,20 @@
     "@nestjs/config": "^3.2.3"
   },
   "devDependencies": {
+    "husky": ">=6",
+    "lint-staged": ">=10",
+    "pinst": ">=2",
     "prettier": "^3.3.3"
+  },
+  "resolutions": {
+    "@mui/material": "npm:@mui/joy@latest"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
+  },
+  "scripts": {
+    "postinstall": "husky install",
+    "prepublishOnly": "pinst --disable",
+    "postpublish": "pinst --enable"
   }
 }

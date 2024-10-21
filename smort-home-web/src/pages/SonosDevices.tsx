@@ -4,6 +4,7 @@ import { sonosDeviceSchema } from '../api/schema';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { MusicNote } from '@mui/icons-material';
 import { NowPlayingInfo } from '../components/molecules/NowPlayingInfo';
+import { SonosDeviceCard } from '../components/organisms/SonosDeviceCard';
 
 export const SonosDevices = () => {
   const collection = useFirestoreCollection(
@@ -16,7 +17,9 @@ export const SonosDevices = () => {
     return (
       <Grid container spacing={2}>
         {collection.data.map((device) => (
-          <Grid xs={6} sm={4} key={device.id}></Grid>
+          <Grid xs={6} sm={4} key={device.id}>
+            <SonosDeviceCard device={device} />
+          </Grid>
         ))}
       </Grid>
     );

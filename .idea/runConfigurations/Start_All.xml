@@ -1,8 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Start All" type="CompoundRunConfigurationType">
-    <toRun name="dev [web]" type="js.build_tools.npm" />
-    <toRun name="start:dev [server]" type="js.build_tools.npm" />
-    <toRun name="storybook [web]" type="js.build_tools.npm" />
+    <toRun name="[server] start:watch" type="js.build_tools.npm" />
+    <toRun name="[web] dev" type="js.build_tools.npm" />
     <method v="2" />
   </configuration>
 </component>

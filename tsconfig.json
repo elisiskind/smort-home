@@ -4,8 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@smort-home/firestore/*": ["packages/firestore/src/*"],
-      "@smort-home/*": ["packages/*/src"]
+      "@smort-home/*": ["lib/*/src"]
     },
     "noEmit": true
   }

@@ -10,7 +10,8 @@
     "prebuild": "pnpm run clean",
     "build": "nest build",
     "start:prod": "node dist/apps/server/src/main",
-    "start:dev": "nest start --watch"
+    "start:watch": "nest start --watch",
+    "start": "nest start"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

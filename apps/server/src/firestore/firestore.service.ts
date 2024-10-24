@@ -6,7 +6,7 @@ import {
   LightUpdate as HueLightUpdate,
 } from '../hue/hue.schema';
 import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
-import { paths } from '../../../../lib/firestore';
+import { paths } from '@smort-home/firestore';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {

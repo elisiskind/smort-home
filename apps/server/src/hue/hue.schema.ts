@@ -2,7 +2,7 @@ import {
   colorTemperatureSchema,
   dimmingSchema,
   onSchema,
-} from '../../../../lib/firestore';
+} from '@smort-home/firestore';
 import { z } from 'zod';
 
 export const lightInputSchema = z.object({

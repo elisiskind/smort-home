@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.build.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@smort-home/firestore/*": ["packages/firestore/src/*"],
+      "@smort-home/*": ["packages/*/src"]
+    },
+    "noEmit": true
+  }
+}

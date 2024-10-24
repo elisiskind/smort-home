@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Server" pattern="file[smort-home]:apps/server//*&amp;&amp;!file[smort-home]:server/keys//*&amp;&amp;!file[smort-home]:server/test//*&amp;&amp;!file:server/nest-cli.json&amp;&amp;!file:server/.gitignore" />
+</component>

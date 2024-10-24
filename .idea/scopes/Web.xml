@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Web" pattern="file[smort-home]:apps/web//*&amp;&amp;!file[smort-home]:web/.firebase//*&amp;&amp;!file[smort-home]:web/dist//*&amp;&amp;!file:web/.firebaserc&amp;&amp;!file:web/firebase.json&amp;&amp;!file:web/tsconfig.node.tsbuildinfo&amp;&amp;!file:web/tsconfig.app.tsbuildinfo" />
+</component>

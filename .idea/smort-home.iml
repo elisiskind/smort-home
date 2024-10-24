@@ -5,7 +5,9 @@
       <excludeFolder url="file://$MODULE_DIR$/temp" />
       <excludeFolder url="file://$MODULE_DIR$/.tmp" />
       <excludeFolder url="file://$MODULE_DIR$/tmp" />
-      <excludeFolder url="file://$MODULE_DIR$/smort-home-server/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/server/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/server/keys" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/web/dist" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

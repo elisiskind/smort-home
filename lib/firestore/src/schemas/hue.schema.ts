@@ -18,7 +18,7 @@ export const onSchema = z.object({
   on: z.boolean(),
 });
 
-export const updateSchema = z
+export const hueLightUpdateSchema = z
   .object({
     on: onSchema,
     dimmingSchema: dimmingSchema.pick({ brightness: true }),
@@ -26,4 +26,4 @@ export const updateSchema = z
   })
   .partial();
 
-export type HueUpdate = z.infer<typeof updateSchema>;
+export type HueUpdate = z.infer<typeof hueLightUpdateSchema>;

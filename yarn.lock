@@ -2856,8 +2856,10 @@ __metadata:
   resolution: "@smort-home/firestore@workspace:lib/firestore"
   dependencies:
     "@eslint/js": "npm:^9.11.1"
+    "@types/luxon": "npm:^3.4.2"
     eslint: "npm:^9.11.1"
     eslint-config-prettier: "npm:^9.1.0"
+    luxon: "npm:^3.5.0"
     storybook: "npm:^8.3.6"
     typescript: "npm:^5.5.3"
     typescript-eslint: "npm:^8.7.0"
@@ -2925,6 +2927,7 @@ __metadata:
     "@storybook/react-vite": "npm:^8.3.6"
     "@storybook/test": "npm:^8.3.6"
     "@types/google.accounts": "npm:^0.0.15"
+    "@types/luxon": "npm:^3.4.2"
     "@types/react": "npm:^18.3.10"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.2"
@@ -2936,6 +2939,7 @@ __metadata:
     firebase: "npm:^10.14.1"
     globals: "npm:^15.9.0"
     immer: "npm:^10.1.1"
+    luxon: "npm:^3.5.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-firebase-hooks: "npm:^5.1.1"
@@ -3753,6 +3757,13 @@ __metadata:
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
   checksum: 10c0/42ec66ade1f72ff9d143c5a519a65efc7c1c77be7b1ac5455c530ae9acd87baba065542f8847522af2e3ace2cc999f3ad464ef86e6b7352eece34daf88f8c924
+  languageName: node
+  linkType: hard
+
+"@types/luxon@npm:^3.4.2":
+  version: 3.4.2
+  resolution: "@types/luxon@npm:3.4.2"
+  checksum: 10c0/d835467de3daf7e17ba78b50bb5a14efd94272439ca067990d71332a54b311544459c69623eddd243b511b28d70194c9591a9ee8cf9c038962c965f991affd7e
   languageName: node
   linkType: hard
 
@@ -9175,6 +9186,13 @@ __metadata:
     lodash.clonedeep: "npm:^4.5.0"
     lru-cache: "npm:6.0.0"
   checksum: 10c0/13cf6bc9ff74cdb167078dbb66d4cf43adc802495da8f56097e6f388b4d7ccb91668beb809bdbc55b62d016c138d7c19a18c5883a2fdbcc7f508ad8a23ec7c65
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "luxon@npm:3.5.0"
+  checksum: 10c0/335789bba95077db831ef99894edadeb23023b3eb2137a1b56acd0d290082b691cf793143d69e30bc069ec95f0b49f36419f48e951c68014f19ffe12045e3494
   languageName: node
   linkType: hard
 

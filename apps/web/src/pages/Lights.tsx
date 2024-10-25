@@ -1,31 +1,45 @@
-import { useUpdateLightMutation } from '../api/api';
 import { Box, Button, CircularProgress } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
-import { useCollection } from 'react-firebase-hooks/firestore';
-import { lightsSchema } from '../api/schema';
+import { lightSchema } from '../api/schema';
+import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
+import { HueLightEvent, paths } from '@smort-home/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
-import { collection } from 'firebase/firestore';
+import { DateTime } from 'luxon';
 
 export const Lights = () => {
-  const [updateLight] = useUpdateLightMutation();
-  const [lightsResult, loading, error] = useCollection(
-    collection(firestore, 'home-state/hue/lights'),
-  );
+  const result = useFirestoreCollection(paths.lights, lightSchema);
 
-  if (lightsResult) {
-    const lights = lightsSchema.parse(
-      lightsResult.docs.map((light) => light.data()),
-    );
+  if (result.isSuccess) {
     return (
       <Grid container spacing={2}>
-        {lights.map((light) => (
+        {result.data.map((light) => (
           <Grid xs={6} sm={4} key={light.id}>
             <Button
               fullWidth
               sx={{ flex: 1 }}
               color={!light.on ? 'neutral' : 'primary'}
               variant={light.on ? 'solid' : 'soft'}
-              onClick={() => updateLight({ id: light.id, on: !light.on })}
+              onClick={async () => {
+                const eventDoc = doc(
+                  firestore,
+                  paths.events(),
+                  DateTime.now().toISOTime(),
+                );
+                const eventData: HueLightEvent = {
+                  id: light.id,
+                  state: {
+                    on: {
+                      on: !light.on,
+                    },
+                  },
+                };
+                await setDoc(eventDoc, {
+                  type: 'hue.light',
+                  handled: false,
+                  data: eventData,
+                });
+              }}
             >
               {light.name}
             </Button>
@@ -33,8 +47,8 @@ export const Lights = () => {
         ))}
       </Grid>
     );
-  } else if (error) {
-    return <Box>{error.message}</Box>;
+  } else if (result.isError) {
+    return <Box>{result.error}</Box>;
   } else {
     return <CircularProgress />;
   }

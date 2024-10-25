@@ -3,6 +3,7 @@ import { EnvService } from '../env/env.service';
 import { lightsSchema, LightUpdate, lightUpdateSchema } from './hue.schema';
 import { z } from 'zod';
 import EventSource = require('eventsource');
+import { HueLightEvent, HueUpdate } from '@smort-home/firestore';
 
 @Injectable()
 export class HueService implements OnModuleDestroy {
@@ -27,10 +28,10 @@ export class HueService implements OnModuleDestroy {
     return lightsSchema.parse(response);
   }
 
-  async setLight(id: string, on: boolean) {
+  async setLight(id: string, state: HueUpdate) {
     return this.request(`resource/light/${id}`, {
       method: 'PUT',
-      body: `{"on": {"on": ${on}}}`,
+      body: JSON.stringify(state),
     });
   }
 
@@ -92,5 +93,9 @@ export class HueService implements OnModuleDestroy {
       console.error(e);
       throw e;
     }
+  }
+
+  async handleHueEvent(event: HueLightEvent) {
+    await this.setLight(event.id, event.state);
   }
 }

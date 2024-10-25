@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { SonosManager } from '@svrooij/sonos/lib';
 import { Observable } from 'rxjs';
 import { ExtendedTransportState } from '@svrooij/sonos/lib/models';
+import { SonosPlaybackEvent } from '@smort-home/firestore';
 
 type PlayingState = 'PLAYING' | 'PAUSED' | 'TRANSITIONING' | 'STOPPED';
 
@@ -104,5 +105,19 @@ export class SonosService implements OnModuleInit {
         });
       });
     });
+  }
+
+  async handlePlaybackEvent(playbackEvent: SonosPlaybackEvent) {
+    await Promise.all(
+      this.manager.Devices.filter(
+        (device) => device.Uuid === playbackEvent.id,
+      ).map((device) => {
+        if (playbackEvent.state === 'PLAY') {
+          return device.AVTransportService.Play({ InstanceID: 0, Speed: '1' });
+        } else if (playbackEvent.state === 'PAUSE') {
+          return device.AVTransportService.Pause();
+        }
+      }),
+    );
   }
 }

@@ -4,7 +4,6 @@
   "description": "For the smortest homes only",
   "main": "index.js",
   "license": "MIT",
-  "packageManager": "pnpm@9.12.2+sha256.2ef6e547b0b07d841d605240dce4d635677831148cd30f6d564b8f4f928f73d2",
   "devDependencies": {
     "husky": ">=6",
     "lint-staged": ">=10",
@@ -18,5 +17,10 @@
     "postinstall": "husky",
     "prepublishOnly": "pinst --disable",
     "postpublish": "pinst --enable"
-  }
+  },
+  "workspaces": [
+    "lib/*",
+    "apps/*"
+  ],
+  "packageManager": "yarn@4.5.1"
 }

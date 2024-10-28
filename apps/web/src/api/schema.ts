@@ -4,9 +4,12 @@ export const lightSchema = z.object({
   id: z.string(),
   name: z.string(),
   on: z.boolean(),
+  dimming: z
+    .object({
+      brightness: z.number(),
+    })
+    .nullable(),
 });
-
-export const lightsSchema = z.array(lightSchema);
 
 export type Light = z.infer<typeof lightSchema>;
 

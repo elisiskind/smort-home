@@ -1,6 +1,5 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { applicationDefault, initializeApp } from 'firebase-admin/app';
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { Firestore } from 'firebase-admin/firestore';
 import {
   Light as HueLight,
   LightUpdate as HueLightUpdate,
@@ -10,14 +9,7 @@ import { paths } from '@smort-home/firestore';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
-  private readonly db: Firestore;
-
-  constructor() {
-    initializeApp({
-      credential: applicationDefault(),
-    });
-    this.db = getFirestore();
-  }
+  constructor(private readonly db: Firestore) {}
 
   async updateLights(lights: HueLight[]) {
     const batch = this.db.batch();

@@ -1,23 +1,22 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
 import { lightsSchema, LightUpdate, lightUpdateSchema } from './hue.schema';
 import { z } from 'zod';
-import EventSource = require('eventsource');
+import EventSource from 'eventsource';
 import { HueLightEvent, HueUpdate } from '@smort-home/firestore';
 
 @Injectable()
 export class HueService implements OnModuleDestroy {
   private readonly baseUrl: string;
   private readonly eventBaseUrl: string;
-  private readonly clientKey: string;
-
   private readonly username: string;
+
+  private readonly logger = new Logger(HueService.name);
 
   private eventSource: EventSource | null = null;
 
-  constructor(private readonly envService: EnvService) {
+  constructor(readonly envService: EnvService) {
     (process.env['NODE_TLS_REJECT_UNAUTHORIZED'] as any) = 0;
-    this.clientKey = envService.get('HUE_BRIDGE_CLIENT_KEY');
     this.username = envService.get('HUE_BRIDGE_USER');
     this.baseUrl = `${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/clip/v2`;
     this.eventBaseUrl = `https://${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/eventstream/clip/v2`;
@@ -48,7 +47,6 @@ export class HueService implements OnModuleDestroy {
       });
     }
     const listener = (message: MessageEvent) => {
-      console.log(message);
       const parsed = z
         .array(
           z
@@ -90,8 +88,7 @@ export class HueService implements OnModuleDestroy {
       const response = await fetch(url, options);
       return response.json();
     } catch (e) {
-      console.error(e);
-      throw e;
+      this.logger.error('Failed to send hue request: ', endpoint, options, e);
     }
   }
 

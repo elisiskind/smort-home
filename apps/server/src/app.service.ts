@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HueService } from './hue/hue.service';
 import { FirestoreService } from './firestore/firestore.service';
 import { SonosService } from './sonos/sonos.service';
@@ -19,6 +19,10 @@ export class AppService implements OnModuleInit {
       this.persistSpeakerStateAndListen(),
       this.listenForClientEvents(),
     ]);
+  }
+
+  helloWorld() {
+    return 'hello world';
   }
 
   private async persistLightsStateAndListen() {

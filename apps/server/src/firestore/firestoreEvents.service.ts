@@ -1,33 +1,31 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { Firestore, getFirestore } from 'firebase-admin/firestore';
+import { Injectable, Logger } from '@nestjs/common';
+import { Firestore } from 'firebase-admin/firestore';
 import { AppEvent, appEventSchema, paths } from '@smort-home/firestore';
-import { FirestoreService } from './firestore.service';
-import { HueService } from '../hue/hue.service';
-import { SonosService } from '../sonos/sonos.service';
+import { AppService } from '../app.service';
 
-@Injectable({ scope: Scope.DEFAULT })
+@Injectable()
 export class FirestoreEventsService {
-  private readonly db: Firestore;
+  private readonly logger = new Logger(AppService.name);
 
-  constructor() {
-    this.db = getFirestore();
-  }
+  constructor(private readonly db: Firestore) {}
 
   onEvent(handleEvent: (event: AppEvent) => Promise<void>) {
-    this.db.collection(paths.events()).onSnapshot((snapshot) => {
-      snapshot.docChanges().map((change) => {
-        if (change.type === 'added') {
-          console.log(change.doc.data());
-          handleEvent(appEventSchema.parse(change.doc.data())).then(() =>
-            change.doc.ref.set(
-              {
-                handled: true,
-              },
-              { merge: true },
-            ),
-          );
-        }
+    this.db
+      .collection(paths.events())
+      .where('handled', '==', false)
+      .onSnapshot((snapshot) => {
+        snapshot.docChanges().map((change) => {
+          if (change.type === 'added') {
+            handleEvent(appEventSchema.parse(change.doc.data()))
+              .then(() =>
+                change.doc.ref.set({ handled: true }, { merge: true }),
+              )
+              .catch((error) => {
+                this.logger.error('Failed to handle event: ', error);
+                return change.doc.ref.set({ error }, { merge: true });
+              });
+          }
+        });
       });
-    });
   }
 }

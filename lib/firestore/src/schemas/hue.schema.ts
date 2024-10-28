@@ -21,7 +21,7 @@ export const onSchema = z.object({
 export const hueLightUpdateSchema = z
   .object({
     on: onSchema,
-    dimmingSchema: dimmingSchema.pick({ brightness: true }),
+    dimming: dimmingSchema.pick({ brightness: true }),
     color_temperature: colorTemperatureSchema.pick({ mirek: true }),
   })
   .partial();

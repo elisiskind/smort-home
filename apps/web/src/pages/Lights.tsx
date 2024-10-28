@@ -1,48 +1,68 @@
-import { Box, Button, CircularProgress } from '@mui/joy';
+import {
+  Box,
+  Card,
+  CircularProgress,
+  Switch,
+  switchClasses,
+  Typography,
+} from '@mui/joy';
 import Grid from '@mui/joy/Grid';
-import { lightSchema } from '../api/schema';
-import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
-import { HueLightEvent, paths } from '@smort-home/firestore';
-import { doc, setDoc } from 'firebase/firestore';
-import { firestore } from '../firebase';
-import { DateTime } from 'luxon';
+import { useHueLights } from '../hooks/useHueLights';
+import { DebouncedSlider } from '../components/atoms/DebouncedSlider';
 
 export const Lights = () => {
-  const result = useFirestoreCollection(paths.lights, lightSchema);
+  const { updateLight, result } = useHueLights();
 
   if (result.isSuccess) {
     return (
       <Grid container spacing={2}>
         {result.data.map((light) => (
           <Grid xs={6} sm={4} key={light.id}>
-            <Button
-              fullWidth
-              sx={{ flex: 1 }}
-              color={!light.on ? 'neutral' : 'primary'}
-              variant={light.on ? 'solid' : 'soft'}
-              onClick={async () => {
-                const eventDoc = doc(
-                  firestore,
-                  paths.events(),
-                  DateTime.now().toISOTime(),
-                );
-                const eventData: HueLightEvent = {
-                  id: light.id,
-                  state: {
-                    on: {
-                      on: !light.on,
-                    },
-                  },
-                };
-                await setDoc(eventDoc, {
-                  type: 'hue.light',
-                  handled: false,
-                  data: eventData,
-                });
-              }}
-            >
-              {light.name}
-            </Button>
+            <Card>
+              <Typography
+                component="label"
+                sx={{
+                  cursor: 'pointer',
+                  flex: 1,
+                  justifyContent: 'space-between',
+                }}
+                endDecorator={
+                  <Switch
+                    checked={light.on}
+                    sx={{
+                      [`& .${switchClasses.thumb}`]: {
+                        transition: 'left 0.2s ease-in-out',
+                      },
+                    }}
+                    onChange={(event) =>
+                      updateLight({
+                        id: light.id,
+                        state: {
+                          on: {
+                            on: event.target.checked,
+                          },
+                        },
+                      })
+                    }
+                  />
+                }
+              >
+                {light.name}
+              </Typography>
+              {light.dimming && (
+                <DebouncedSlider
+                  serverValue={light.dimming.brightness}
+                  onChange={(value) =>
+                    updateLight({
+                      id: light.id,
+                      state: {
+                        dimming: { brightness: value },
+                      },
+                    })
+                  }
+                />
+              )}
+            </Card>
           </Grid>
         ))}
       </Grid>

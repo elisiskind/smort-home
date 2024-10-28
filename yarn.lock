@@ -2949,6 +2949,7 @@ __metadata:
     tsconfig-paths: "npm:~4.2.0"
     typescript: "npm:^5.5.3"
     typescript-eslint: "npm:^8.7.0"
+    use-debounce: "npm:^10.0.4"
     use-immer: "npm:^0.10.0"
     vite: "npm:^5.4.8"
     vite-tsconfig-paths: "npm:~4.2.0"
@@ -12166,6 +12167,15 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10c0/4ef57b45aa820d7ac6496e9208559986c665e49447cb072744c13b66925a362d96dd5a46c4530a6b8e203e5db5fe849369444440cb22ecfc26c679359e5dfa3c
+  languageName: node
+  linkType: hard
+
+"use-debounce@npm:^10.0.4":
+  version: 10.0.4
+  resolution: "use-debounce@npm:10.0.4"
+  peerDependencies:
+    react: "*"
+  checksum: 10c0/73494fc44b2bd58a7ec799a528fc20077c45fe2e94fedff6dcd88d136f7a39f417d77f584d5613aac615ed32aeb2ea393797ae1f7d5b2645eab57cb497a6d0cb
   languageName: node
   linkType: hard
 

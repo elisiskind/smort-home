@@ -2,3 +2,4 @@
 /**/.env
 /.yarn/install-state.gz
 /**/node_modules/
+/smort-home-server/keys/

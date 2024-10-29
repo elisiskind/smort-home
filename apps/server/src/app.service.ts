@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { HueService } from './hue/hue.service';
 import { FirestoreService } from './firestore/firestore.service';
 import { SonosService } from './sonos/sonos.service';
 import { FirestoreEventsService } from './firestore/firestoreEvents.service';
+import { ArduinoService } from './arduino/arduino.service';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -11,6 +12,7 @@ export class AppService implements OnModuleInit {
     private readonly firestoreEventsService: FirestoreEventsService,
     private readonly hueService: HueService,
     private readonly sonosService: SonosService,
+    private readonly arduinoService: ArduinoService,
   ) {}
 
   async onModuleInit() {
@@ -28,9 +30,10 @@ export class AppService implements OnModuleInit {
   private async persistLightsStateAndListen() {
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
-    this.hueService.listen((update) =>
-      this.firestoreService.updateLight(update),
-    );
+    this.hueService.listen(async (update) => {
+      this.arduinoService.notify();
+      return this.firestoreService.updateLight(update);
+    });
   }
 
   private async persistSpeakerStateAndListen() {

@@ -7,6 +7,7 @@ import { HueModule } from './hue/hue.module';
 import { FirestoreModule } from './firestore/firestore.module';
 import { SonosModule } from './sonos/sonos.module';
 import { AppController } from './app.controller';
+import { ArduinoModule } from './arduino/arduino.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AppController } from './app.controller';
     HueModule,
     FirestoreModule,
     SonosModule,
+    ArduinoModule,
   ],
   providers: [AppService],
   controllers: [AppController],

@@ -1,6 +1,11 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
-import { lightsSchema, LightUpdate, lightUpdateSchema } from './hue.schema';
+import {
+  lightsSchema,
+  LightUpdate,
+  lightUpdateSchema,
+  roomsSchema,
+} from './hue.schema';
 import { z } from 'zod';
 import EventSource from 'eventsource';
 import { HueLightEvent, HueUpdate } from '@smort-home/firestore';
@@ -25,6 +30,17 @@ export class HueService implements OnModuleDestroy {
   async getLights() {
     const response = await this.request('resource/light');
     return lightsSchema.parse(response);
+  }
+
+  async getRooms() {
+    this.getGroups();
+    const response = await this.request('resource/room');
+    return roomsSchema.parse(response);
+  }
+
+  async getGroups() {
+    const response = await this.request('/resource/device');
+    console.log(JSON.stringify(response, null, 2));
   }
 
   async setLight(id: string, state: HueUpdate) {

@@ -28,10 +28,13 @@ export class AppService implements OnModuleInit {
   }
 
   private async persistLightsStateAndListen() {
+    const rooms = await this.hueService.getRooms();
+    await this.firestoreService.updateRooms(rooms);
+
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
     this.hueService.listen(async (update) => {
-      this.arduinoService.notify();
+      // this.arduinoService.notify();
       return this.firestoreService.updateLight(update);
     });
   }

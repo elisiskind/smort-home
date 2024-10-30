@@ -8,6 +8,9 @@ import { z } from 'zod';
 export const lightInputSchema = z.object({
   type: z.literal('light'),
   id: z.string(),
+  owner: z.object({
+    rid: z.string(),
+  }),
   metadata: z.object({
     name: z.string(),
   }),
@@ -38,9 +41,10 @@ export const lightInputSchema = z.object({
 });
 
 const lightSchema = lightInputSchema
-  .transform(({ metadata, color_temperature, ...light }) => ({
+  .transform(({ metadata, color_temperature, owner, ...light }) => ({
     colorTemperature: color_temperature,
     name: metadata.name,
+    rid: owner.rid,
     ...light,
   }))
   .readonly();
@@ -64,3 +68,30 @@ export const lightsSchema = z
 
 export type Light = z.infer<typeof lightSchema>;
 export type LightUpdate = z.infer<typeof lightUpdateSchema>;
+
+export const roomSchema = z
+  .object({
+    id: z.string(),
+    children: z.array(
+      z.object({
+        rid: z.string(),
+      }),
+    ),
+    metadata: z.object({
+      name: z.string(),
+      type: z.literal('room').optional(),
+    }),
+  })
+  .transform((room) => ({
+    id: room.id,
+    lights: room.children.map(({ rid }) => rid),
+    name: room.metadata.name,
+  }));
+
+export type Room = z.infer<typeof roomSchema>;
+
+export const roomsSchema = z
+  .object({
+    data: z.array(roomSchema),
+  })
+  .transform(({ data }) => data);

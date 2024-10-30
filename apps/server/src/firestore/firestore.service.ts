@@ -2,6 +2,7 @@ import { Injectable, Scope } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 import {
   Light as HueLight,
+  Room as HueRoom,
   LightUpdate as HueLightUpdate,
 } from '../hue/hue.schema';
 import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
@@ -15,6 +16,13 @@ export class FirestoreService {
     const batch = this.db.batch();
     lights.forEach((light) => {
       batch.set(this.lightsCollection().doc(light.id), light);
+    });
+    await batch.commit();
+  }
+  async updateRooms(rooms: HueRoom[]) {
+    const batch = this.db.batch();
+    rooms.forEach((room) => {
+      batch.set(this.roomsCollection().doc(room.id), room);
     });
     await batch.commit();
   }
@@ -39,6 +47,9 @@ export class FirestoreService {
 
   private lightsCollection() {
     return this.db.collection(paths.lights);
+  }
+  private roomsCollection() {
+    return this.db.collection(paths.rooms);
   }
 
   private sonosDevicesCollection() {

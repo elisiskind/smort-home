@@ -33,9 +33,9 @@ export class AppService implements OnModuleInit {
 
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
-    this.hueService.listen(async (update) => {
+    this.hueService.listen(async (event) => {
       // this.arduinoService.notify();
-      return this.firestoreService.updateLight(update);
+      return this.firestoreService.updateLight(event);
     });
   }
 
@@ -52,6 +52,7 @@ export class AppService implements OnModuleInit {
       if (event.type === 'sonos.playback') {
         await this.sonosService.handlePlaybackEvent(event.data);
       } else if (event.type === 'hue.light') {
+        console.log('event', event);
         await this.hueService.handleHueEvent(event.data);
       }
     });

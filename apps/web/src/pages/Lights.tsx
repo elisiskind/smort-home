@@ -34,14 +34,10 @@ export const Lights = () => {
                         transition: 'left 0.2s ease-in-out',
                       },
                     }}
-                    onChange={(event) =>
+                    onChange={({ target: { checked: on } }) =>
                       updateLight({
                         id: light.id,
-                        state: {
-                          on: {
-                            on: event.target.checked,
-                          },
-                        },
+                        state: { on },
                       })
                     }
                   />
@@ -52,12 +48,10 @@ export const Lights = () => {
               {light.dimming && (
                 <DebouncedSlider
                   serverValue={light.dimming.brightness}
-                  onChange={(value) =>
+                  onChange={(brightness) =>
                     updateLight({
                       id: light.id,
-                      state: {
-                        dimming: { brightness: value },
-                      },
+                      state: { dimming: { brightness } },
                     })
                   }
                 />

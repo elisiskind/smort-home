@@ -1,29 +1,51 @@
 import { z } from 'zod';
 
-export const colorTemperatureSchema = z.object({
-  mirek: z.number(),
-  mirek_valid: z.boolean(),
-  mirek_schema: z.object({
-    mirek_minimum: z.number(),
-    mirek_maximum: z.number(),
-  }),
+const colorTemperatureSchema = z.object({
+  value: z.number(),
+  schema: z
+    .object({
+      min: z.number(),
+      max: z.number(),
+    })
+    .readonly(),
 });
 
-export const dimmingSchema = z.object({
+const dimmingSchema = z.object({
   brightness: z.number(),
-  min_dim_level: z.number().optional(),
+  minDimLevel: z.number().nullable(),
 });
 
-export const onSchema = z.object({
-  on: z.boolean(),
-});
-
-export const hueLightUpdateSchema = z
+export const lightSchema = z
   .object({
-    on: onSchema,
-    dimming: dimmingSchema.pick({ brightness: true }),
-    color_temperature: colorTemperatureSchema.pick({ mirek: true }),
+    type: z.literal('light'),
+    id: z.string(),
+    rid: z.string(),
+    name: z.string(),
+    on: z.boolean(),
+    dimming: dimmingSchema.readonly().nullable(),
+    colorTemperature: colorTemperatureSchema.readonly().nullable(),
   })
-  .partial();
+  .readonly();
 
-export type HueUpdate = z.infer<typeof hueLightUpdateSchema>;
+export type Light = z.infer<typeof lightSchema>;
+
+export const lightUpdateSchema = z
+  .object({
+    on: z.boolean().optional(),
+    dimming: dimmingSchema.pick({ brightness: true }).readonly().optional(),
+    colorTemperature: colorTemperatureSchema
+      .pick({ value: true })
+      .readonly()
+      .optional(),
+  })
+  .readonly();
+
+export type LightUpdate = z.infer<typeof lightUpdateSchema>;
+
+export const roomSchema = z.object({
+  id: z.string(),
+  lights: z.array(z.string()),
+  name: z.string(),
+});
+
+export type Room = z.infer<typeof roomSchema>;

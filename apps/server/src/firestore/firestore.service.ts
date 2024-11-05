@@ -1,25 +1,25 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Logger, Scope } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
-import {
-  Light as HueLight,
-  Room as HueRoom,
-  LightUpdate as HueLightUpdate,
-} from '../hue/hue.schema';
+
 import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
-import { paths } from '@smort-home/firestore';
+import { Light, paths, Room } from '@smort-home/firestore';
+import { HueLightUpdateEvent } from '../hue/schemas/lightSchema';
+const test = (val: boolean) => val;
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
+  private readonly logger = new Logger(FirestoreService.name);
   constructor(private readonly db: Firestore) {}
 
-  async updateLights(lights: HueLight[]) {
+  async updateLights(lights: Light[]) {
     const batch = this.db.batch();
     lights.forEach((light) => {
       batch.set(this.lightsCollection().doc(light.id), light);
     });
     await batch.commit();
   }
-  async updateRooms(rooms: HueRoom[]) {
+
+  async updateRooms(rooms: Room[]) {
     const batch = this.db.batch();
     rooms.forEach((room) => {
       batch.set(this.roomsCollection().doc(room.id), room);
@@ -27,8 +27,30 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async updateLight(light: HueLightUpdate) {
-    await this.lightsCollection().doc(light.id).update(light);
+  async updateLight({
+    on,
+    id,
+    colorTemperature,
+    dimming,
+  }: HueLightUpdateEvent) {
+    const firestoreUpdate = {} as any;
+
+    if (on !== null) {
+      firestoreUpdate.on = on;
+    }
+    if (colorTemperature) {
+      firestoreUpdate['colorTemperature.value'] = colorTemperature.value;
+      if (colorTemperature.valid !== null) {
+        firestoreUpdate['colorTemperature.valid'] = colorTemperature.valid;
+      }
+    }
+    if (dimming) {
+      firestoreUpdate.dimming = dimming;
+    }
+
+    this.logger.log('Update: ', firestoreUpdate);
+
+    await this.lightsCollection().doc(id).update(firestoreUpdate);
   }
 
   async updateSonosDevices(sonosDevices: SonosDevice[]) {
@@ -48,6 +70,7 @@ export class FirestoreService {
   private lightsCollection() {
     return this.db.collection(paths.lights);
   }
+
   private roomsCollection() {
     return this.db.collection(paths.rooms);
   }

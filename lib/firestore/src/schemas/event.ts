@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { hueLightUpdateSchema } from '@smort-home/firestore';
+import { lightUpdateSchema } from '@smort-home/firestore';
 
 const createEventSchema = <T extends string, D extends z.ZodTypeAny>(
   event: T,
@@ -27,7 +27,7 @@ export const hueLightEventSchema = createEventSchema(
   'hue.light',
   z.object({
     id: z.string(),
-    state: hueLightUpdateSchema,
+    state: lightUpdateSchema,
   }),
 );
 

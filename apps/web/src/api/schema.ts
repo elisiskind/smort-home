@@ -1,25 +1,5 @@
 import { z } from 'zod';
 
-export const lightSchema = z.object({
-  id: z.string(),
-  rid: z.string(),
-  name: z.string(),
-  on: z.boolean(),
-  dimming: z
-    .object({
-      brightness: z.number(),
-    })
-    .nullable(),
-});
-
-export type Light = z.infer<typeof lightSchema>;
-
-export const roomSchema = z.object({
-  id: z.string(),
-  lights: z.array(z.string()),
-  name: z.string(),
-});
-
 export const sonosDeviceSchema = z.object({
   id: z.string(),
   name: z.string(),

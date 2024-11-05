@@ -1,14 +1,16 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
-import {
-  lightsSchema,
-  LightUpdate,
-  lightUpdateSchema,
-  roomsSchema,
-} from './hue.schema';
+
 import { z } from 'zod';
 import EventSource from 'eventsource';
-import { HueLightEvent, HueUpdate } from '@smort-home/firestore';
+import { HueLightEvent, LightUpdate } from '@smort-home/firestore';
+import { transformLightUpdate } from './schemas/transformations';
+import {
+  HueLightUpdateEvent,
+  hueLightUpdateSchema,
+  lightsSchema,
+} from './schemas/lightSchema';
+import { roomsSchema } from './schemas/roomSchema';
 
 @Injectable()
 export class HueService implements OnModuleDestroy {
@@ -33,24 +35,27 @@ export class HueService implements OnModuleDestroy {
   }
 
   async getRooms() {
-    this.getGroups();
     const response = await this.request('resource/room');
     return roomsSchema.parse(response);
   }
 
   async getGroups() {
-    const response = await this.request('/resource/device');
+    const response = await this.request('/resource/grouped_light');
     console.log(JSON.stringify(response, null, 2));
   }
 
-  async setLight(id: string, state: HueUpdate) {
+  async setLight(id: string, update: LightUpdate) {
+    this.logger.log(
+      'Updating: ',
+      JSON.stringify(transformLightUpdate(id, update)),
+    );
     return this.request(`resource/light/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(state),
+      body: JSON.stringify(transformLightUpdate(id, update)),
     });
   }
 
-  listen(onEvent: (event: LightUpdate) => void) {
+  listen(onEvent: (event: HueLightUpdateEvent) => void) {
     if (this.eventSource === null) {
       this.eventSource = new EventSource(this.eventBaseUrl, {
         headers: {
@@ -69,22 +74,26 @@ export class HueService implements OnModuleDestroy {
             .object({
               data: z.array(z.object({ type: z.string() }).passthrough()),
             })
-            .transform((data) => data.data),
+            .transform(({ data }) => data),
         )
         .parse(JSON.parse(message.data));
 
       parsed
         .flatMap((data) => data)
         .filter((data) => data.type === 'light')
-        .map((data) => lightUpdateSchema.parse(data))
+        .map((data) => hueLightUpdateSchema.parse(data))
         .forEach((update) => onEvent(update));
     };
     this.eventSource.addEventListener('message', listener);
-    return () => this.eventSource.removeEventListener('message', listener);
+    return () => this.eventSource?.removeEventListener('message', listener);
   }
 
   onModuleDestroy() {
     this.eventSource?.close();
+  }
+
+  async handleHueEvent(event: HueLightEvent) {
+    await this.setLight(event.id, event.state);
   }
 
   private async request(
@@ -95,10 +104,10 @@ export class HueService implements OnModuleDestroy {
       options.headers = {};
     }
     if (options.body && options.method !== 'GET') {
-      options.headers['Content-Type'] = 'application/json';
+      (options.headers as any)['Content-Type'] = 'application/json';
     }
     options.keepalive = true;
-    options.headers['hue-application-key'] = this.username;
+    (options.headers as any)['hue-application-key'] = this.username;
     const url = `https://${this.baseUrl}/${endpoint}`;
     try {
       const response = await fetch(url, options);
@@ -106,9 +115,5 @@ export class HueService implements OnModuleDestroy {
     } catch (e) {
       this.logger.error('Failed to send hue request: ', endpoint, options, e);
     }
-  }
-
-  async handleHueEvent(event: HueLightEvent) {
-    await this.setLight(event.id, event.state);
   }
 }

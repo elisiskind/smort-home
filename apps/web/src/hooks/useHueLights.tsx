@@ -1,9 +1,8 @@
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
-import { HueLightEvent, paths } from '@smort-home/firestore';
+import { HueLightEvent, lightSchema, paths } from '@smort-home/firestore';
 import { DateTime } from 'luxon';
 import { useFirestoreCollection } from './useFirestoreCollection';
-import { lightSchema } from '../api/schema';
 
 export const useHueLights = () => {
   const result = useFirestoreCollection(paths.lights, lightSchema);

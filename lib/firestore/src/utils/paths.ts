@@ -3,8 +3,13 @@ import { DateTime } from 'luxon';
 const homeStateRoot = 'home-state';
 
 export const paths = {
-  lights: `${homeStateRoot}/hue/lights`,
-  rooms: `${homeStateRoot}/hue/rooms`,
-  sonosDevices: `${homeStateRoot}/sonos/devices`,
+  hue: {
+    lights: `${homeStateRoot}/hue/lights`,
+    behaviors: `${homeStateRoot}/hue/behaviors`,
+    rooms: `${homeStateRoot}/hue/rooms`,
+  },
+  sonos: {
+    devices: `${homeStateRoot}/sonos/devices`,
+  },
   events: () => `events/${DateTime.now().toISODate()}/events`,
 };

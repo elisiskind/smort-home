@@ -2,7 +2,7 @@ import { Injectable, Logger, Scope } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 
 import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
-import { Light, paths, Room } from '@smort-home/firestore';
+import { Behavior, Light, paths, Room } from '@smort-home/firestore';
 import { HueLightUpdateEvent } from '../hue/schemas/lightSchema';
 const test = (val: boolean) => val;
 
@@ -15,6 +15,15 @@ export class FirestoreService {
     const batch = this.db.batch();
     lights.forEach((light) => {
       batch.set(this.lightsCollection().doc(light.id), light);
+    });
+    await batch.commit();
+  }
+
+  async updateBehaviors(behaviors: Behavior[]) {
+    const batch = this.db.batch();
+    behaviors.forEach((behavior) => {
+      this.logger.log('Behavior: ', behavior);
+      batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
     });
     await batch.commit();
   }
@@ -68,14 +77,18 @@ export class FirestoreService {
   }
 
   private lightsCollection() {
-    return this.db.collection(paths.lights);
+    return this.db.collection(paths.hue.lights);
+  }
+
+  private behaviorsCollection() {
+    return this.db.collection(paths.hue.behaviors);
   }
 
   private roomsCollection() {
-    return this.db.collection(paths.rooms);
+    return this.db.collection(paths.hue.rooms);
   }
 
   private sonosDevicesCollection() {
-    return this.db.collection(paths.sonosDevices);
+    return this.db.collection(paths.sonos.devices);
   }
 }

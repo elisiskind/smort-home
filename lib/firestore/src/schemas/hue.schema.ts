@@ -49,3 +49,12 @@ export const roomSchema = z.object({
 });
 
 export type Room = z.infer<typeof roomSchema>;
+
+export const behaviorSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  configuration: z.any(),
+  enabled: z.boolean(),
+});
+
+export type Behavior = z.infer<typeof behaviorSchema>;

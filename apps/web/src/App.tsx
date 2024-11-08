@@ -1,6 +1,7 @@
 import { Box, Stack, Tab, tabClasses, TabList, TabPanel, Tabs } from '@mui/joy';
 import { Lights } from './pages/Lights';
 import { SonosDevices } from './pages/SonosDevices';
+import { Automations } from './pages/Automations';
 
 export const App = () => {
   return (
@@ -39,7 +40,9 @@ export const App = () => {
         <TabPanel value={1}>
           <SonosDevices />
         </TabPanel>
-        <TabPanel value={2}>Coming soon...</TabPanel>
+        <TabPanel value={2}>
+          <Automations />
+        </TabPanel>
       </Tabs>
     </Stack>
   );

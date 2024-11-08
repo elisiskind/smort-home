@@ -11,6 +11,8 @@ import {
   lightsSchema,
 } from './schemas/lightSchema';
 import { roomsSchema } from './schemas/roomSchema';
+import { writeFileSync } from 'fs';
+import { behaviorsSchema } from './schemas/automationSchema';
 
 @Injectable()
 export class HueService implements OnModuleDestroy {
@@ -39,9 +41,9 @@ export class HueService implements OnModuleDestroy {
     return roomsSchema.parse(response);
   }
 
-  async getGroups() {
-    const response = await this.request('/resource/grouped_light');
-    console.log(JSON.stringify(response, null, 2));
+  async getBehaviors() {
+    const response = await this.request('resource/behavior_instance');
+    return behaviorsSchema.parse(response);
   }
 
   async setLight(id: string, update: LightUpdate) {

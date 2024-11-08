@@ -33,6 +33,10 @@ export class AppService implements OnModuleInit {
 
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
+
+    const behaviors = await this.hueService.getBehaviors();
+    await this.firestoreService.updateBehaviors(behaviors);
+
     this.hueService.listen(async (event) => {
       // this.arduinoService.notify();
       return this.firestoreService.updateLight(event);

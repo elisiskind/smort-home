@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { lightUpdateSchema } from '@smort-home/firestore';
+import { behaviorSchema, lightUpdateSchema } from '@smort-home/firestore';
 
 const createEventSchema = <T extends string, D extends z.ZodTypeAny>(
   event: T,
@@ -33,9 +33,21 @@ export const hueLightEventSchema = createEventSchema(
 
 export type HueLightEvent = z.infer<typeof hueLightEventSchema>['data'];
 
+export const hueBehaviorEventSchema = createEventSchema(
+  'hue.behavior',
+  z.any(),
+);
+
+export const antiBeanSprayEventSchema = createEventSchema(
+  'antibean.spray',
+  z.number(),
+);
+
 export const appEventSchema = z.discriminatedUnion('type', [
   sonosPlaybackEventSchema,
   hueLightEventSchema,
+  hueBehaviorEventSchema,
+  antiBeanSprayEventSchema,
 ]);
 
 export type AppEvent = z.infer<typeof appEventSchema>;

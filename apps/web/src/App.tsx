@@ -2,6 +2,7 @@ import { Box, Stack, Tab, tabClasses, TabList, TabPanel, Tabs } from '@mui/joy';
 import { Lights } from './pages/Lights';
 import { SonosDevices } from './pages/SonosDevices';
 import { Automations } from './pages/Automations';
+import { BeanRemediation } from './pages/BeanRemediation';
 
 export const App = () => {
   return (
@@ -33,6 +34,7 @@ export const App = () => {
           <Tab disableIndicator>Lights</Tab>
           <Tab disableIndicator>Speakers</Tab>
           <Tab disableIndicator>Automations</Tab>
+          <Tab disableIndicator>Bean Remediation</Tab>
         </TabList>
         <TabPanel value={0}>
           <Lights />
@@ -42,6 +44,9 @@ export const App = () => {
         </TabPanel>
         <TabPanel value={2}>
           <Automations />
+        </TabPanel>
+        <TabPanel value={3}>
+          <BeanRemediation />
         </TabPanel>
       </Tabs>
     </Stack>

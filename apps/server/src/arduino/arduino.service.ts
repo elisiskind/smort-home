@@ -14,10 +14,9 @@ export class ArduinoService {
     this.ip = envService.get('ARDUINO_IP');
   }
 
-  notify() {
-    this.logger.log('Notifying!');
+  notify(duration: number) {
     this.httpService
-      .post(`http://${this.ip}/notify`, '')
+      .post(`http://${this.ip}/notify`, duration)
       .forEach((response) => {
         this.logger.log('Response: ', response.status);
       });

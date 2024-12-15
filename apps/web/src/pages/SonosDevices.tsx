@@ -7,7 +7,7 @@ import { paths } from '@smort-home/firestore';
 
 export const SonosDevices = () => {
   const collection = useFirestoreCollection(
-    paths.sonosDevices,
+    paths.sonos.devices,
     sonosDeviceSchema,
   );
 

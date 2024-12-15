@@ -16,6 +16,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["google.accounts"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

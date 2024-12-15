@@ -58,6 +58,8 @@ export class AppService implements OnModuleInit {
       } else if (event.type === 'hue.light') {
         console.log('event', event);
         await this.hueService.handleHueEvent(event.data);
+      } else if (event.type === 'antibean.spray') {
+        await this.arduinoService.notify(event.data);
       }
     });
   }

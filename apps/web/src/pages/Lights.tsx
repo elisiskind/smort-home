@@ -1,65 +1,27 @@
-import {
-  Box,
-  Card,
-  CircularProgress,
-  Switch,
-  switchClasses,
-  Typography,
-} from '@mui/joy';
+import { Box, Card, CircularProgress, Stack, useTheme } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
 import { useHueLights } from '../hooks/useHueLights';
-import { DebouncedSlider } from '../components/atoms/DebouncedSlider';
+import { LightCard } from '../components/molecules/LightCard';
 
 export const Lights = () => {
-  const { updateLight, result } = useHueLights();
+  const result = useHueLights();
 
   if (result.isSuccess) {
     return (
-      <Grid container spacing={2}>
-        {result.data.map((light) => (
-          <Grid xs={6} sm={4} key={light.id}>
-            <Card>
-              <Typography
-                component="label"
-                sx={{
-                  cursor: 'pointer',
-                  flex: 1,
-                  justifyContent: 'space-between',
-                }}
-                endDecorator={
-                  <Switch
-                    checked={light.on}
-                    sx={{
-                      [`& .${switchClasses.thumb}`]: {
-                        transition: 'left 0.2s ease-in-out',
-                      },
-                    }}
-                    onChange={({ target: { checked: on } }) =>
-                      updateLight({
-                        id: light.id,
-                        state: { on },
-                      })
-                    }
-                  />
-                }
-              >
-                {light.name}
-              </Typography>
-              {light.dimming && (
-                <DebouncedSlider
-                  serverValue={light.dimming.brightness}
-                  onChange={(brightness) =>
-                    updateLight({
-                      id: light.id,
-                      state: { dimming: { brightness } },
-                    })
-                  }
-                />
-              )}
-            </Card>
-          </Grid>
+      <Stack spacing={2}>
+        {result.data.map(({ room, lights }) => (
+          <Card key={room.id} sx={{}}>
+            <Box>{room.name}</Box>
+            <Grid container spacing={2}>
+              {lights.map((light) => (
+                <Grid xs={6} sm={4} key={light.id}>
+                  <LightCard light={light} />
+                </Grid>
+              ))}
+            </Grid>
+          </Card>
         ))}
-      </Grid>
+      </Stack>
     );
   } else if (result.isError) {
     return <Box>{result.error}</Box>;

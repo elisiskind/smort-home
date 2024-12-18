@@ -1,14 +1,20 @@
 import { Injectable, Logger, Scope } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 
-import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
+import {
+  SonosAlarm,
+  SonosDevice,
+  SonosDeviceUpdate,
+} from '../sonos/sonos.service';
 import { Behavior, Light, paths, Room } from '@smort-home/firestore';
 import { HueLightUpdateEvent } from '../hue/schemas/lightSchema';
+
 const test = (val: boolean) => val;
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
   private readonly logger = new Logger(FirestoreService.name);
+
   constructor(private readonly db: Firestore) {}
 
   async updateLights(lights: Light[]) {
@@ -21,10 +27,10 @@ export class FirestoreService {
 
   async updateBehaviors(behaviors: Behavior[]) {
     const batch = this.db.batch();
-    behaviors.forEach((behavior) => {
-      this.logger.log('Behavior: ', behavior);
-      batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
-    });
+    // behaviors.forEach((behavior) => {
+    //   this.logger.log('Behavior: ', behavior);
+    //   batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
+    // });
     await batch.commit();
   }
 
@@ -36,12 +42,7 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async updateLight({
-    on,
-    id,
-    colorTemperature,
-    dimming,
-  }: HueLightUpdateEvent) {
+  async syncLight({ on, id, colorTemperature, dimming }: HueLightUpdateEvent) {
     const firestoreUpdate = {} as any;
 
     if (on !== null) {
@@ -56,13 +57,16 @@ export class FirestoreService {
     if (dimming) {
       firestoreUpdate.dimming = dimming;
     }
-
-    this.logger.log('Update: ', firestoreUpdate);
-
-    await this.lightsCollection().doc(id).update(firestoreUpdate);
+    if (Object.keys(firestoreUpdate)) {
+      try {
+        await this.lightsCollection().doc(id).update(firestoreUpdate);
+      } catch (e) {
+        this.logger.error('Failed to apply hue update: ', firestoreUpdate, e);
+      }
+    }
   }
 
-  async updateSonosDevices(sonosDevices: SonosDevice[]) {
+  async syncSonosDevices(sonosDevices: SonosDevice[]) {
     const batch = this.db.batch();
     sonosDevices.forEach((sonosDevice) => {
       batch.set(this.sonosDevicesCollection().doc(sonosDevice.id), sonosDevice);
@@ -70,7 +74,15 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async updateSonosDevice(sonosDeviceUpdate: SonosDeviceUpdate) {
+  async syncSonosAlarms(sonosAlarms: SonosAlarm[]) {
+    const batch = this.db.batch();
+    sonosAlarms.forEach((sonosAlarm) => {
+      batch.set(this.sonosAlarmsCollection().doc(sonosAlarm.id), sonosAlarm);
+    });
+    await batch.commit();
+  }
+
+  async syncSonosDevice(sonosDeviceUpdate: SonosDeviceUpdate) {
     await this.sonosDevicesCollection()
       .doc(sonosDeviceUpdate.id)
       .update(sonosDeviceUpdate);
@@ -90,5 +102,9 @@ export class FirestoreService {
 
   private sonosDevicesCollection() {
     return this.db.collection(paths.sonos.devices);
+  }
+
+  private sonosAlarmsCollection() {
+    return this.db.collection(paths.sonos.alarms);
   }
 }

@@ -10,7 +10,7 @@ import {
   hueLightUpdateSchema,
   lightsSchema,
 } from './schemas/lightSchema';
-import { roomsSchema } from './schemas/roomSchema';
+import { groupsSchema, roomsSchema } from './schemas/roomSchema';
 import { writeFileSync } from 'fs';
 import { behaviorsSchema } from './schemas/automationSchema';
 
@@ -40,6 +40,10 @@ export class HueService implements OnModuleDestroy {
     const response = await this.request('resource/room');
     return roomsSchema.parse(response);
   }
+  async getGroups() {
+    const response = await this.request('resource/grouped_light');
+    return groupsSchema.parse(response);
+  }
 
   async getBehaviors() {
     const response = await this.request('resource/behavior_instance');
@@ -47,10 +51,6 @@ export class HueService implements OnModuleDestroy {
   }
 
   async setLight(id: string, update: LightUpdate) {
-    this.logger.log(
-      'Updating: ',
-      JSON.stringify(transformLightUpdate(id, update)),
-    );
     return this.request(`resource/light/${id}`, {
       method: 'PUT',
       body: JSON.stringify(transformLightUpdate(id, update)),

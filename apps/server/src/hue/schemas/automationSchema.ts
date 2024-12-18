@@ -6,10 +6,7 @@ const behaviorSchema = z
     metadata: z.object({
       name: z.string(),
     }),
-    configuration: z.object({
-      when: z.object({}).passthrough().optional(),
-      when_extended: z.object({}).passthrough().optional(),
-    }),
+    configuration: z.any(),
     enabled: z.boolean(),
   })
   .transform(({ metadata, ...behavior }) => ({

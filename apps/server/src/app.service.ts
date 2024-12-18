@@ -1,12 +1,17 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HueService } from './hue/hue.service';
 import { FirestoreService } from './firestore/firestore.service';
 import { SonosService } from './sonos/sonos.service';
 import { FirestoreEventsService } from './firestore/firestoreEvents.service';
 import { ArduinoService } from './arduino/arduino.service';
+import { AppEvent } from '@smort-home/firestore';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AppService implements OnModuleInit {
+  private readonly logger = new Logger(AppService.name);
+  private unsubscribe: (() => void) | null = null;
+
   constructor(
     private readonly firestoreService: FirestoreService,
     private readonly firestoreEventsService: FirestoreEventsService,
@@ -27,40 +32,63 @@ export class AppService implements OnModuleInit {
     return 'hello world';
   }
 
-  private async persistLightsStateAndListen() {
+  async syncLightsState() {
+    const groups = await this.hueService.getGroups();
+
     const rooms = await this.hueService.getRooms();
-    await this.firestoreService.updateRooms(rooms);
+    const hydrated = rooms.map((room) => ({
+      ...room,
+      group: groups.find(({ owner }) => owner === room.id) ?? null,
+    }));
+    await this.firestoreService.updateRooms(hydrated);
 
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
 
     const behaviors = await this.hueService.getBehaviors();
     await this.firestoreService.updateBehaviors(behaviors);
+  }
 
+  private async persistLightsStateAndListen() {
+    await this.syncLightsState();
     this.hueService.listen(async (event) => {
       // this.arduinoService.notify();
-      return this.firestoreService.updateLight(event);
+      return this.firestoreService.syncLight(event);
     });
   }
 
   private async persistSpeakerStateAndListen() {
     const speakers = await this.sonosService.getDevices();
-    await this.firestoreService.updateSonosDevices(speakers);
+    await this.firestoreService.syncSonosDevices(speakers);
+
+    const alarms = await this.sonosService.getAlarms();
+    await this.firestoreService.syncSonosAlarms(alarms);
+
     this.sonosService.listenForUpdates().subscribe((update) => {
-      this.firestoreService.updateSonosDevice(update);
+      this.firestoreService.syncSonosDevice(update);
     });
   }
 
-  private async listenForClientEvents() {
-    this.firestoreEventsService.onEvent(async (event) => {
-      if (event.type === 'sonos.playback') {
-        await this.sonosService.handlePlaybackEvent(event.data);
-      } else if (event.type === 'hue.light') {
-        console.log('event', event);
-        await this.hueService.handleHueEvent(event.data);
-      } else if (event.type === 'antibean.spray') {
-        await this.arduinoService.notify(event.data);
-      }
-    });
+  private readonly onEvent = async (event: AppEvent) => {
+    if (event.type === 'sonos.playback') {
+      await this.sonosService.handlePlaybackEvent(event.data);
+    } else if (event.type === 'hue.light') {
+      await this.hueService.handleHueEvent(event.data);
+    } else if (event.type === 'antibean.spray') {
+      await this.arduinoService.notify(event.data);
+    }
+  };
+
+  @Cron('0 0 * * *')
+  private refreshSubscription() {
+    this.logger.log('Refreshing subscription for new day.');
+    this.listenForClientEvents();
+  }
+
+  private listenForClientEvents() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
+    this.unsubscribe = this.firestoreEventsService.onEvent(this.onEvent);
   }
 }

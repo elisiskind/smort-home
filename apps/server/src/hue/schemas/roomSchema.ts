@@ -25,3 +25,37 @@ export const roomsSchema = z
     data: z.array(roomSchema),
   })
   .transform(({ data }) => data);
+
+export const groupSchema = z.object({
+  id: z.string(),
+  owner: z.object({
+    rid: z.string(),
+    rtype: z.string(),
+  }),
+  on: z
+    .object({
+      on: z.boolean(),
+    })
+    .transform(({ on }) => on),
+  dimming: z
+    .object({
+      brightness: z.number(),
+    })
+    .transform(({ brightness }) => brightness)
+    .optional()
+    .transform((brightness) => brightness ?? null),
+});
+
+export const groupsSchema = z
+  .object({
+    data: z.array(groupSchema),
+  })
+  .transform(({ data }) => data)
+  .transform((data) =>
+    data
+      .filter(({ owner }) => (owner.rtype = 'room'))
+      .map(({ owner, ...group }) => ({
+        ...group,
+        owner: owner.rid,
+      })),
+  );

@@ -6,6 +6,17 @@ import { SonosPlaybackEvent } from '@smort-home/firestore';
 
 type PlayingState = 'PLAYING' | 'PAUSED' | 'TRANSITIONING' | 'STOPPED';
 
+export type SonosAlarm = {
+  recurrence: string;
+  duration: string;
+  id: string;
+  enabled: boolean;
+  music: {
+    title: string;
+    art: string | null;
+  };
+};
+
 export interface SonosDevice {
   id: string;
   name: string;
@@ -72,6 +83,29 @@ export class SonosService implements OnModuleInit {
     );
     return await Promise.all(promises);
   }
+
+  async getAlarms(): Promise<SonosAlarm[]> {
+    const rawAlarms =
+      await this.manager.Devices[0]?.AlarmClockService.ListAndParseAlarms();
+    return rawAlarms.map((alarm) => ({
+      id: alarm.ID.toString(),
+      enabled: alarm.Enabled,
+      duration: alarm.Duration,
+      recurrence: alarm.Recurrence,
+      music:
+        typeof alarm.ProgramMetaData == 'string'
+          ? {
+              art: null,
+              title: alarm.ProgramMetaData,
+            }
+          : {
+              title: alarm.ProgramMetaData.Title ?? 'No title',
+              art: alarm.ProgramMetaData.AlbumArtUri ?? null,
+            },
+    }));
+  }
+
+  async updateAlarm() {}
 
   listenForUpdates(): Observable<SonosDeviceUpdate> {
     return new Observable((subscriber) => {

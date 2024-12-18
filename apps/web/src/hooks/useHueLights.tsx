@@ -5,22 +5,38 @@ import {
   HueLightEvent,
   lightSchema,
   paths,
+  roomSchema,
 } from '@smort-home/firestore';
 import { DateTime } from 'luxon';
 import { useFirestoreCollection } from './useFirestoreCollection';
+import { errorResult, loadingResult, successResult } from './dataWrappingUtils';
+
+export const updateHueLight = async (data: HueLightEvent) => {
+  const eventDoc = doc(firestore, paths.events(), DateTime.now().toISOTime());
+  await setDoc(eventDoc, {
+    type: 'hue.light',
+    handled: false,
+    data,
+  });
+};
 
 export const useHueLights = () => {
-  const result = useFirestoreCollection(paths.hue.lights, lightSchema);
-  const updateLight = async (data: HueLightEvent) => {
-    const eventDoc = doc(firestore, paths.events(), DateTime.now().toISOTime());
-    await setDoc(eventDoc, {
-      type: 'hue.light',
-      handled: false,
-      data,
-    });
-  };
+  const lightsResult = useFirestoreCollection(paths.hue.lights, lightSchema);
+  const roomsResult = useFirestoreCollection(paths.hue.rooms, roomSchema);
 
-  return { result, updateLight };
+  if (lightsResult.isSuccess && roomsResult.isSuccess) {
+    const data = roomsResult.data.map((room) => ({
+      room,
+      lights: lightsResult.data.filter(({ rid }) => room.lights.includes(rid)),
+    }));
+    return successResult(data);
+  } else if (lightsResult.isError) {
+    return errorResult('Failed to load lights: ' + lightsResult.error);
+  } else if (roomsResult.isError) {
+    return errorResult('Failed to load rooms: ' + roomsResult.error);
+  } else {
+    return loadingResult;
+  }
 };
 
 export const useHueBehaviors = () => {

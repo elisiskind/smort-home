@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { Slider } from '@mui/joy';
+import { SxProps } from '@mui/joy/styles/types';
 
 interface DebouncedSliderProps {
   serverValue: number;
   onChange: (value: number) => void;
+  sx?: SxProps;
 }
 
 export const DebouncedSlider = ({
   serverValue,
   onChange,
+  sx,
 }: DebouncedSliderProps) => {
   const [value, setValue] = useState(serverValue);
   const [debounced] = useDebounce(value, 500);
@@ -34,6 +37,7 @@ export const DebouncedSlider = ({
         setInteracting(true);
         setValue(typeof value === 'number' ? value : value[0]);
       }}
+      sx={sx}
       max={100}
     />
   );

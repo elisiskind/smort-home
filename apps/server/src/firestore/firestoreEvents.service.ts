@@ -10,7 +10,7 @@ export class FirestoreEventsService {
   constructor(private readonly db: Firestore) {}
 
   onEvent(handleEvent: (event: AppEvent) => Promise<void>) {
-    this.db
+    return this.db
       .collection(paths.events())
       .where('handled', '==', false)
       .onSnapshot((snapshot) => {

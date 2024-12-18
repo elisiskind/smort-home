@@ -10,6 +10,8 @@ const colorTemperatureSchema = z.object({
     .readonly(),
 });
 
+export type ColorTemperature = z.infer<typeof colorTemperatureSchema>;
+
 const dimmingSchema = z.object({
   brightness: z.number(),
   minDimLevel: z.number().nullable(),
@@ -46,6 +48,14 @@ export const roomSchema = z.object({
   id: z.string(),
   lights: z.array(z.string()),
   name: z.string(),
+  group: z
+    .object({
+      id: z.string(),
+      owner: z.string(),
+      on: z.boolean(),
+      dimming: z.number().nullable(),
+    })
+    .nullable(),
 });
 
 export type Room = z.infer<typeof roomSchema>;

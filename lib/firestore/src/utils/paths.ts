@@ -10,6 +10,7 @@ export const paths = {
   },
   sonos: {
     devices: `${homeStateRoot}/sonos/devices`,
+    alarms: `${homeStateRoot}/sonos/alarms`,
   },
   events: () => `events/${DateTime.now().toISODate()}/events`,
 };

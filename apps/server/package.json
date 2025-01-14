@@ -9,9 +9,9 @@
     "clean": "rm -rf dist",
     "prebuild": "pnpm run clean",
     "build": "nest build",
-    "start:prod": "node dist/apps/server/src/main",
-    "start:watch": "nest start --watch",
-    "start": "nest start"
+    "start:prod": "SONOS_REGION_SPOTIFY=3079 node dist/apps/server/src/main",
+    "start:watch": "SONOS_REGION_SPOTIFY=3079 nest start --watch",
+    "start": "SONOS_REGION_SPOTIFY=3079 nest start"
   },
   "dependencies": {
     "@nestjs/axios": "^3.1.1",

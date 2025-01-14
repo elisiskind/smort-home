@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SonosManager } from '@svrooij/sonos/lib';
 import { Observable } from 'rxjs';
 import { ExtendedTransportState } from '@svrooij/sonos/lib/models';
@@ -48,6 +48,7 @@ const normalizePlayingState = (state: ExtendedTransportState) => {
 @Injectable()
 export class SonosService implements OnModuleInit {
   private readonly manager: SonosManager = new SonosManager();
+  private logger = new Logger(SonosService.name);
 
   async onModuleInit() {
     await this.manager.InitializeWithDiscovery(10);
@@ -105,8 +106,6 @@ export class SonosService implements OnModuleInit {
     }));
   }
 
-  async updateAlarm() {}
-
   listenForUpdates(): Observable<SonosDeviceUpdate> {
     return new Observable((subscriber) => {
       this.manager.Devices.forEach(async (device) => {
@@ -122,19 +121,12 @@ export class SonosService implements OnModuleInit {
             nowPlaying:
               track === undefined
                 ? null
-                : typeof track === 'string'
-                  ? {
-                      title: track,
-                      album: null,
-                      artist: null,
-                      artUrl: null,
-                    }
-                  : {
-                      title: track.Title ?? null,
-                      album: track.Album ?? null,
-                      artist: track.Artist ?? null,
-                      artUrl: track.AlbumArtUri ?? null,
-                    },
+                : {
+                    title: track.Title ?? null,
+                    album: track.Album ?? null,
+                    artist: track.Artist ?? null,
+                    artUrl: track.AlbumArtUri ?? null,
+                  },
           });
         });
       });

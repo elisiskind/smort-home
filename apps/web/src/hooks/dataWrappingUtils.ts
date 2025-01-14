@@ -36,7 +36,7 @@ export const errorResult = (error: string) =>
 export const successResult = <T>(data: T) =>
   ({
     isLoading: false,
-    isError: true,
+    isError: false,
     isSuccess: true,
     data,
   }) as const;

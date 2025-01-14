@@ -22,7 +22,10 @@ export class FirestoreEventsService {
               )
               .catch((error) => {
                 this.logger.error('Failed to handle event: ', error);
-                return change.doc.ref.set({ error }, { merge: true });
+                return change.doc.ref.set(
+                  { error: JSON.stringify(error, null, '  '), handled: true },
+                  { merge: true },
+                );
               });
           }
         });

@@ -63,7 +63,14 @@ export type Room = z.infer<typeof roomSchema>;
 export const behaviorSchema = z.object({
   id: z.string(),
   name: z.string(),
-  configuration: z.any(),
+  when: z.object({
+    time: z.object({
+      hour: z.number(),
+      minute: z.number(),
+    }),
+    days: z.array(z.string()),
+    type: z.enum(['when', 'when_extended']),
+  }),
   enabled: z.boolean(),
 });
 

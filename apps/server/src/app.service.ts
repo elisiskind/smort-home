@@ -24,8 +24,8 @@ export class AppService implements OnModuleInit {
     await Promise.all([
       this.persistLightsStateAndListen(),
       this.persistSpeakerStateAndListen(),
-      this.listenForClientEvents(),
     ]);
+    this.listenForClientEvents();
   }
 
   helloWorld() {
@@ -52,7 +52,6 @@ export class AppService implements OnModuleInit {
   private async persistLightsStateAndListen() {
     await this.syncLightsState();
     this.hueService.listen(async (event) => {
-      // this.arduinoService.notify();
       return this.firestoreService.syncLight(event);
     });
   }

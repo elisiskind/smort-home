@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { EnvService } from '../env/env.service';
 
 import { z } from 'zod';
@@ -11,8 +17,8 @@ import {
   lightsSchema,
 } from './schemas/lightSchema';
 import { groupsSchema, roomsSchema } from './schemas/roomSchema';
-import { writeFileSync } from 'fs';
 import { behaviorsSchema } from './schemas/automationSchema';
+import { HueBridgeMetadata } from './hueBridgeDiscovery';
 
 @Injectable()
 export class HueService implements OnModuleDestroy {
@@ -24,11 +30,14 @@ export class HueService implements OnModuleDestroy {
 
   private eventSource: EventSource | null = null;
 
-  constructor(readonly envService: EnvService) {
+  constructor(
+    readonly envService: EnvService,
+    @Inject('HUE_BRIDGE_METADATA') hueBridgeMetadata: HueBridgeMetadata,
+  ) {
     (process.env['NODE_TLS_REJECT_UNAUTHORIZED'] as any) = 0;
     this.username = envService.get('HUE_BRIDGE_USER');
-    this.baseUrl = `${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/clip/v2`;
-    this.eventBaseUrl = `https://${envService.get('HUE_BRIDGE_HOST')}:${envService.get('HUE_BRIDGE_PORT')}/eventstream/clip/v2`;
+    this.baseUrl = `${hueBridgeMetadata.ip}:${hueBridgeMetadata.port}/clip/v2`;
+    this.eventBaseUrl = `https://${hueBridgeMetadata.ip}:${hueBridgeMetadata.port}/eventstream/clip/v2`;
   }
 
   async getLights() {
@@ -40,6 +49,7 @@ export class HueService implements OnModuleDestroy {
     const response = await this.request('resource/room');
     return roomsSchema.parse(response);
   }
+
   async getGroups() {
     const response = await this.request('resource/grouped_light');
     return groupsSchema.parse(response);
@@ -101,7 +111,7 @@ export class HueService implements OnModuleDestroy {
   private async request(
     endpoint: string,
     options: RequestInit = { headers: {}, method: 'GET' },
-  ) {
+  ): Promise<unknown> {
     if (!options.headers) {
       options.headers = {};
     }
@@ -116,6 +126,7 @@ export class HueService implements OnModuleDestroy {
       return response.json();
     } catch (e) {
       this.logger.error('Failed to send hue request: ', endpoint, options, e);
+      throw new Error(`Failed to send hue request: ${endpoint}`);
     }
   }
 }

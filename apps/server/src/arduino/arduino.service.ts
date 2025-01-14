@@ -15,10 +15,14 @@ export class ArduinoService {
   }
 
   notify(duration: number) {
-    this.httpService
-      .post(`http://${this.ip}/notify`, duration)
-      .forEach((response) => {
-        this.logger.log('Response: ', response.status);
-      });
+    try {
+      this.httpService
+        .post(`http://${this.ip}/spray`, duration)
+        .forEach((response) => {
+          this.logger.log('Response: ', response.status);
+        });
+    } catch (e) {
+      this.logger.error('Failed to post', e);
+    }
   }
 }

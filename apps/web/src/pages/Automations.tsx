@@ -44,7 +44,7 @@ export const Automations = () => {
               >
                 {behavior.name}
               </Typography>
-              <code>{JSON.stringify(behavior.configuration, null, 2)}</code>
+              <code>{JSON.stringify(behavior.when, null, 2)}</code>
             </Card>
           </Grid>
         ))}

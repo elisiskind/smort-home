@@ -9,8 +9,6 @@ import {
 import { Behavior, Light, paths, Room } from '@smort-home/firestore';
 import { HueLightUpdateEvent } from '../hue/schemas/lightSchema';
 
-const test = (val: boolean) => val;
-
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
   private readonly logger = new Logger(FirestoreService.name);
@@ -27,10 +25,9 @@ export class FirestoreService {
 
   async updateBehaviors(behaviors: Behavior[]) {
     const batch = this.db.batch();
-    // behaviors.forEach((behavior) => {
-    //   this.logger.log('Behavior: ', behavior);
-    //   batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
-    // });
+    behaviors.forEach((behavior) => {
+      batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
+    });
     await batch.commit();
   }
 
@@ -57,7 +54,7 @@ export class FirestoreService {
     if (dimming) {
       firestoreUpdate.dimming = dimming;
     }
-    if (Object.keys(firestoreUpdate)) {
+    if (Object.keys(firestoreUpdate).length) {
       try {
         await this.lightsCollection().doc(id).update(firestoreUpdate);
       } catch (e) {

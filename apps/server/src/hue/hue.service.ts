@@ -12,6 +12,8 @@ import EventSource from 'eventsource';
 import { HueLightEvent, LightUpdate } from '@smort-home/firestore';
 import { transformLightUpdate } from './schemas/transformations';
 import {
+  HueButtonEvent,
+  hueButtonEventSchema,
   HueLightUpdateEvent,
   hueLightUpdateSchema,
   lightsSchema,
@@ -67,7 +69,10 @@ export class HueService implements OnModuleDestroy {
     });
   }
 
-  listen(onEvent: (event: HueLightUpdateEvent) => void) {
+  listen(
+    onLightEvent: (event: HueLightUpdateEvent) => void,
+    onButtonEvent: (event: HueButtonEvent) => void,
+  ) {
     if (this.eventSource === null) {
       this.eventSource = new EventSource(this.eventBaseUrl, {
         headers: {
@@ -94,7 +99,13 @@ export class HueService implements OnModuleDestroy {
         .flatMap((data) => data)
         .filter((data) => data.type === 'light')
         .map((data) => hueLightUpdateSchema.parse(data))
-        .forEach((update) => onEvent(update));
+        .forEach(onLightEvent);
+
+      parsed
+        .flatMap((data) => data)
+        .filter((data) => data.type === 'button')
+        .map((data) => hueButtonEventSchema.parse(data))
+        .forEach(onButtonEvent);
     };
     this.eventSource.addEventListener('message', listener);
     return () => this.eventSource?.removeEventListener('message', listener);

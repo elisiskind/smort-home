@@ -14,10 +14,10 @@ export class ArduinoService {
     this.ip = envService.get('ARDUINO_IP');
   }
 
-  notify(duration: number) {
+  spray() {
     try {
       this.httpService
-        .post(`http://${this.ip}/spray`, duration)
+        .post(`http://${this.ip}/spray`, null)
         .forEach((response) => {
           this.logger.log('Response: ', response.status);
         });

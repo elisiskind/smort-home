@@ -6,6 +6,7 @@ import { FirestoreEventsService } from './firestore/firestoreEvents.service';
 import { ArduinoService } from './arduino/arduino.service';
 import { AppEvent } from '@smort-home/firestore';
 import { Cron } from '@nestjs/schedule';
+import { HueButtonEvent } from './hue/schemas/lightSchema';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -51,9 +52,19 @@ export class AppService implements OnModuleInit {
 
   private async persistLightsStateAndListen() {
     await this.syncLightsState();
-    this.hueService.listen(async (event) => {
-      return this.firestoreService.syncLight(event);
-    });
+    this.hueService.listen(
+      (event) => this.firestoreService.syncLight(event),
+      (event) => this.onHueButtonEvent(event),
+    );
+  }
+
+  private onHueButtonEvent(event: HueButtonEvent) {
+    if (
+      event.buttonEvent === 'initial_press' &&
+      event.id === 'd8fa4ce6-b76c-409a-9228-4a7e0f6d7d98'
+    ) {
+      this.arduinoService.spray();
+    }
   }
 
   private async persistSpeakerStateAndListen() {
@@ -74,7 +85,7 @@ export class AppService implements OnModuleInit {
     } else if (event.type === 'hue.light') {
       await this.hueService.handleHueEvent(event.data);
     } else if (event.type === 'antibean.spray') {
-      await this.arduinoService.notify(event.data);
+      await this.arduinoService.spray();
     }
   };
 

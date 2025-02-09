@@ -6,7 +6,7 @@ import { FirestoreEventsService } from './firestore/firestoreEvents.service';
 import { ArduinoService } from './arduino/arduino.service';
 import { AppEvent } from '@smort-home/firestore';
 import { Cron } from '@nestjs/schedule';
-import { HueButtonEvent } from './hue/schemas/lightSchema';
+import { HueButtonEvent } from './hue/schemas/hue.button.schema';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -34,20 +34,14 @@ export class AppService implements OnModuleInit {
   }
 
   async syncLightsState() {
-    const groups = await this.hueService.getGroups();
-
     const rooms = await this.hueService.getRooms();
-    const hydrated = rooms.map((room) => ({
-      ...room,
-      group: groups.find(({ owner }) => owner === room.id) ?? null,
-    }));
-    await this.firestoreService.updateRooms(hydrated);
+    await this.firestoreService.updateRooms(rooms);
 
     const lights = await this.hueService.getLights();
     await this.firestoreService.updateLights(lights);
 
-    const behaviors = await this.hueService.getBehaviors();
-    await this.firestoreService.updateBehaviors(behaviors);
+    const alarms = await this.hueService.getAlarms();
+    await this.firestoreService.updateBehaviors(alarms);
   }
 
   private async persistLightsStateAndListen() {

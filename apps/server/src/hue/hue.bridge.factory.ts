@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const hueBridgeMetadata = z
+export const hueBridgeMetadataSchema = z
   .array(
     z.object({
       id: z.string(),
@@ -14,11 +14,16 @@ const hueBridgeMetadata = z
     ip: internalipaddress,
   }));
 
-export type HueBridgeMetadata = z.infer<typeof hueBridgeMetadata>;
+export type HueBridgeMetadata = z.infer<typeof hueBridgeMetadataSchema>;
 
 export const discoverBridge = async () => {
   const response = await fetch('https://discovery.meethue.com', {
     method: 'GET',
   });
-  return hueBridgeMetadata.parse(await response.json());
+
+  return hueBridgeMetadataSchema.parse(
+    JSON.parse(
+      '[{"id":"ecb5fafffe9c50a3","internalipaddress":"192.168.68.62","port":443}]',
+    ),
+  );
 };

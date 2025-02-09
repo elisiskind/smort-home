@@ -47,7 +47,7 @@ const onSchema = z
   })
   .transform(({ on }) => on);
 
-export const lightSchema = z
+const lightSchema = z
   .object({
     type: z.literal('light'),
     id: z.string(),
@@ -95,23 +95,6 @@ export const hueLightUpdateSchema = z
     } as const;
   })
   .readonly();
-
-export const hueButtonEventSchema = z
-  .object({
-    id: z.string(),
-    button: z.object({
-      button_report: z.object({
-        event: z.string(),
-      }),
-    }),
-  })
-  .transform(({ id, button }) => ({
-    id,
-    buttonEvent: button.button_report.event,
-  }))
-  .readonly();
-
-export type HueButtonEvent = z.infer<typeof hueButtonEventSchema>;
 
 export type HueLightUpdateEvent = {
   id: string;

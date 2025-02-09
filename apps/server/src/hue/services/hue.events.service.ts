@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import {
   HueLightUpdateEvent,
   hueLightUpdateSchema,
@@ -12,11 +17,25 @@ import {
 } from '../schemas/hue.button.schema';
 import { HueBridgeMetadata } from '../hue.bridge.factory';
 
+const baseHueEventSchema = z
+  .array(
+    z.object({
+      data: z.array(z.object({ type: z.string() }).passthrough()),
+    }),
+  )
+  .transform((events) => events.flatMap(({ data }) => data));
+
+export type HueEvent = { type: string };
+
 @Injectable()
-export class HueEventsService implements OnModuleDestroy {
+export class HueEventsService implements OnModuleDestroy, OnModuleInit {
   private eventSource: EventSource | null = null;
   private readonly eventBaseUrl: string;
   private readonly username: string;
+  private readonly subscriptions: Record<
+    string,
+    ((event: HueEvent) => void)[]
+  > = {};
 
   constructor(
     readonly envService: EnvService,
@@ -27,35 +46,23 @@ export class HueEventsService implements OnModuleDestroy {
     this.eventBaseUrl = `https://${hueBridgeMetadata.ip}:${hueBridgeMetadata.port}/eventstream/clip/v2`;
   }
 
-  listen(
-    onLightEvent: (event: HueLightUpdateEvent) => void,
-    onButtonEvent: (event: HueButtonEvent) => void,
-  ) {
+  subscribe(eventName: string, onEvent: (event: HueEvent) => void) {
+    this.subscriptions[eventName] = [
+      ...(this.subscriptions[eventName] ?? []),
+      onEvent,
+    ];
+  }
+
+  onModuleInit() {
     const listener = (message: MessageEvent) => {
-      const parsed = z
-        .array(
-          z
-            .object({
-              data: z.array(z.object({ type: z.string() }).passthrough()),
-            })
-            .transform(({ data }) => data),
-        )
-        .parse(JSON.parse(message.data));
+      const parsed = baseHueEventSchema.parse(JSON.parse(message.data));
 
-      parsed
-        .flatMap((data) => data)
-        .filter((data) => data.type === 'light')
-        .map((data) => hueLightUpdateSchema.parse(data))
-        .forEach(onLightEvent);
-
-      parsed
-        .flatMap((data) => data)
-        .filter((data) => data.type === 'button')
-        .map((data) => hueButtonEventSchema.parse(data))
-        .forEach(onButtonEvent);
+      parsed.forEach((event) => {
+        const handlers = this.subscriptions[event.type] ?? [];
+        handlers.forEach((onEvent) => onEvent(event));
+      });
     };
     this.getEventSource().addEventListener('message', listener);
-    return () => this.eventSource?.removeEventListener('message', listener);
   }
 
   onModuleDestroy() {

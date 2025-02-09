@@ -4,8 +4,14 @@ import { HueAlarmService } from './services/hue.alarm.service';
 import { HueEventsService } from './services/hue.events.service';
 import { HueLightService } from './services/hue.light.service';
 import { HueRoomService } from './services/hue.room.service';
-import { HueLightUpdateEvent } from './schemas/hue.light.schema';
-import { HueButtonEvent } from './schemas/hue.button.schema';
+import {
+  HueLightUpdateEvent,
+  hueLightUpdateSchema,
+} from './schemas/hue.light.schema';
+import {
+  HueButtonEvent,
+  hueButtonEventSchema,
+} from './schemas/hue.button.schema';
 
 @Injectable()
 export class HueService {
@@ -32,10 +38,15 @@ export class HueService {
     await this.lightService.setLight(event.id, event.state);
   }
 
-  async listen(
-    onLightEvent: (event: HueLightUpdateEvent) => void,
-    onButtonEvent: (event: HueButtonEvent) => void,
-  ) {
-    this.eventService.listen(onLightEvent, onButtonEvent);
+  handleLightEvents(onLightEvent: (event: HueLightUpdateEvent) => void) {
+    this.eventService.subscribe('light', (event) =>
+      onLightEvent(hueLightUpdateSchema.parse(event)),
+    );
+  }
+
+  handleButtonEvents(onButtonEvent: (event: HueButtonEvent) => void) {
+    this.eventService.subscribe('button', (event) =>
+      onButtonEvent(hueButtonEventSchema.parse(event)),
+    );
   }
 }

@@ -1,10 +1,10 @@
 import { ColorTemperature } from '@smort-home/firestore';
 
 export const gradientStops = [
-  [0, [255, 213, 146]] as const,
-  [33, [255, 252, 166]] as const,
-  [66, [255, 255, 255]] as const,
-  [100, [221, 250, 255]] as const,
+  [0, [221, 250, 255]] as const,
+  [33, [255, 255, 255]] as const,
+  [66, [255, 252, 166]] as const,
+  [100, [255, 213, 146]] as const,
 ] as const;
 
 export const calculateColor = (
@@ -12,10 +12,10 @@ export const calculateColor = (
 ): readonly [number, number, number] => {
   const exactMatch = gradientStops.find(([stop]) => stop === factor);
   if (exactMatch) return exactMatch[1];
-  const colorAIndex =
-    gradientStops.findLastIndex(([stop]) => stop <= factor) ?? 0;
-  const [colorAStop, colorAValue] = gradientStops[colorAIndex];
-  const [colorBStop, colorBValue] = gradientStops[colorAIndex + 1];
+  const colorAIndex: number =
+    gradientStops.findIndex(([stop]) => stop >= factor) ?? 0;
+  const [colorAStop, colorAValue] = gradientStops[colorAIndex - 1];
+  const [colorBStop, colorBValue] = gradientStops[colorAIndex];
   const adjustedFactor = (factor - colorAStop) / (colorBStop - colorAStop);
   return colorAValue.map(
     (aVal, index) => aVal + adjustedFactor * (colorBValue[index] - aVal),

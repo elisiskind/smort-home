@@ -46,10 +46,10 @@ export class AppService implements OnModuleInit {
 
   private async persistLightsStateAndListen() {
     await this.syncLightsState();
-    this.hueService.listen(
-      (event) => this.firestoreService.syncLight(event),
-      (event) => this.onHueButtonEvent(event),
+    this.hueService.handleLightEvents((event) =>
+      this.firestoreService.syncLight(event),
     );
+    this.hueService.handleButtonEvents((event) => this.onHueButtonEvent(event));
   }
 
   private onHueButtonEvent(event: HueButtonEvent) {

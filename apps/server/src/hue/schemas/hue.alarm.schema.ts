@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { AlarmTrigger } from '../services/hue.alarm.service';
 
 const behaviorSchema = z
   .object({
@@ -35,58 +36,69 @@ const withTimePoint = {
   }),
 } as const;
 
-export const behaviorsSchema = z
+const configurationSchema = z
   .object({
-    data: z.array(behaviorSchema),
+    when: z.object({
+      ...withTimePoint,
+      ...withRecurrenceDays,
+    }),
   })
-  .transform(({ data }) => {
-    return data
-      .filter((entry) => Object.keys(entry.configuration))
-      .filter(
-        (data) =>
-          'when_extended' in data.configuration || 'when' in data.configuration,
-      )
-      .map(({ configuration, ...data }) => {
-        const when = z
-          .union([
-            z
-              .object({
-                when_extended: z.object({
-                  ...withRecurrenceDays,
-                  start_at: z.object({
-                    ...withTimePoint,
-                  }),
-                }),
-              })
-              .transform(
-                ({ when_extended }) =>
-                  ({
-                    time: when_extended.start_at.time_point.time,
-                    days: when_extended.recurrence_days,
-                    type: 'when_extended',
-                  }) as const,
-              ),
-            z
-              .object({
-                when: z.object({
-                  ...withTimePoint,
-                  ...withRecurrenceDays,
-                }),
-              })
-              .transform(
-                ({ when }) =>
-                  ({
-                    time: when.time_point.time,
-                    days: when.recurrence_days,
-                    type: 'when',
-                  }) as const,
-              ),
-          ])
-          .parse(configuration);
+  .transform(
+    ({ when }) =>
+      ({
+        amOrPm: when.time_point.time.hour >= 12 ? 'PM' : 'AM',
+        hour: ((when.time_point.time.hour + 11) % 12) + 1,
+        minute: when.time_point.time.minute,
+      }) as const,
+  );
 
-        return {
+export const alarmSchema = (alarmIds: string[]) =>
+  z
+    .object({
+      data: z.array(behaviorSchema),
+    })
+    .transform(({ data }) => {
+      return data
+        .filter(({ id }) => alarmIds.includes(id))
+        .map(({ configuration, ...data }) => ({
           ...data,
-          when,
-        };
-      });
-  });
+          when: configurationSchema.parse(configuration),
+        }));
+    });
+
+export const hueAlarmEventSchema = (alarmIds: string[]) =>
+  z
+    .object({
+      id: z.string(),
+      enabled: z.boolean().optional(),
+      configuration: z.any().optional(),
+      metadata: z
+        .object({
+          name: z.string(),
+        })
+        .optional(),
+    })
+    .passthrough()
+    .transform(({ id, configuration, enabled, metadata }) => {
+      if (alarmIds.includes(id)) {
+        return {
+          ignore: false,
+          id,
+          enabled: enabled ?? null,
+          name: metadata ? metadata.name : null,
+          when: configuration ? configurationSchema.parse(configuration) : null,
+        } as const;
+      } else {
+        return {
+          ignore: true,
+        } as const;
+      }
+    })
+    .readonly();
+
+export type HueAlarmUpdateEvent = {
+  id: string;
+  enabled: boolean | null;
+  when: AlarmTrigger | null;
+  name: string | null;
+};

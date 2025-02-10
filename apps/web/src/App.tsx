@@ -10,17 +10,12 @@ import {
 } from '@mui/joy';
 import { Lights } from './pages/Lights';
 import { SonosDevices } from './pages/SonosDevices';
-import { Automations } from './pages/Automations';
+import { Alarms } from './pages/Alarms';
 import { BeanRemediation } from './pages/BeanRemediation';
-import { playPhoebe } from './hooks/useFirestoreEvents';
 
 export const App = () => {
   return (
     <Stack sx={{ minHeight: '100vh', padding: 2, gap: 2 }}>
-      <Box display={'flex'} justifyContent={'space-between'}>
-        <Box>Smort home!</Box>
-        <Button onClick={playPhoebe}>Only press in emergencies</Button>
-      </Box>
       <Tabs
         aria-label="Basic tabs"
         defaultValue={0}
@@ -46,7 +41,7 @@ export const App = () => {
         >
           <Tab disableIndicator>Lights</Tab>
           <Tab disableIndicator>Speakers</Tab>
-          <Tab disableIndicator>Automations</Tab>
+          <Tab disableIndicator>Alarms</Tab>
           <Tab disableIndicator>Bean Remediation</Tab>
         </TabList>
         <TabPanel value={0}>
@@ -56,7 +51,7 @@ export const App = () => {
           <SonosDevices />
         </TabPanel>
         <TabPanel value={2}>
-          <Automations />
+          <Alarms />
         </TabPanel>
         <TabPanel value={3}>
           <BeanRemediation />

@@ -1,5 +1,5 @@
 import { DebouncedSlider } from '../atoms/DebouncedSlider';
-import { updateHueLight } from '../../hooks/useHueLights';
+import { updateHueLight } from '../../events/hueLightEvents';
 import { ColorTemperature } from '@smort-home/firestore';
 import { useTheme } from '@mui/joy';
 import {

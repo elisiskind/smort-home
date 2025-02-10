@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/joy';
 import * as events from 'events';
-import { HueLightEvent, paths } from '@smort-home/firestore';
+import { LightEvent, paths } from '@smort-home/firestore';
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import { DateTime } from 'luxon';

@@ -23,7 +23,7 @@ export class AppService implements OnModuleInit {
 
   async onModuleInit() {
     await Promise.all([
-      this.persistLightsStateAndListen(),
+      this.persistHueStateAndListen(),
       this.persistSpeakerStateAndListen(),
     ]);
     this.listenForClientEvents();
@@ -41,13 +41,16 @@ export class AppService implements OnModuleInit {
     await this.firestoreService.updateLights(lights);
 
     const alarms = await this.hueService.getAlarms();
-    await this.firestoreService.updateBehaviors(alarms);
+    await this.firestoreService.updateAlarms(alarms);
   }
 
-  private async persistLightsStateAndListen() {
+  private async persistHueStateAndListen() {
     await this.syncLightsState();
     this.hueService.handleLightEvents((event) =>
-      this.firestoreService.syncLight(event),
+      this.firestoreService.syncHueLight(event),
+    );
+    this.hueService.handleAlarmEvents((event) =>
+      this.firestoreService.syncHueAlarm(event),
     );
     this.hueService.handleButtonEvents((event) => this.onHueButtonEvent(event));
   }
@@ -77,9 +80,11 @@ export class AppService implements OnModuleInit {
     if (event.type === 'sonos.playback') {
       await this.sonosService.handlePlaybackEvent(event.data);
     } else if (event.type === 'hue.light') {
-      await this.hueService.handleHueEvent(event.data);
+      await this.hueService.handleHueLightEvent(event.data);
+    } else if (event.type === 'hue.alarm') {
+      await this.hueService.handleHueAlarmEvent(event.data);
     } else if (event.type === 'antibean.spray') {
-      await this.arduinoService.spray();
+      this.arduinoService.spray();
     }
   };
 

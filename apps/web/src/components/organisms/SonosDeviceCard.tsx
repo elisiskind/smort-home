@@ -2,7 +2,7 @@ import { Box, Button, Card, Stack, Typography } from '@mui/joy';
 import { NowPlayingInfo } from '../molecules/NowPlayingInfo';
 import { SonosDevice } from '../../api/schema';
 import { MusicNote } from '../atoms/MusicNote';
-import { updatePlaybackState } from '../../hooks/useFirestoreEvents';
+import { updatePlaybackState } from '../../events/sonosEvents';
 
 interface SonosDeviceCardProps {
   device: SonosDevice;

@@ -12,7 +12,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/joy';
-import { updateHueLight } from '../../hooks/useHueLights';
+import { updateHueLight } from '../../events/hueLightEvents';
 import { DebouncedSlider } from '../atoms/DebouncedSlider';
 import { ColorTemperatureSlider } from './ColorTemperatureSlider';
 import { Light } from '@smort-home/firestore';

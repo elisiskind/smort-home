@@ -1,15 +1,105 @@
-import { Injectable } from '@nestjs/common';
-import { behaviorsSchema } from '../schemas/hue.alarm.schema';
+import { Injectable, Logger } from '@nestjs/common';
+import { alarmSchema } from '../schemas/hue.alarm.schema';
 import { HueRequestService } from './hue.request.service';
+import { EnvService } from '../../env/env.service';
+
+export interface AlarmTrigger {
+  minute: number;
+  hour: number;
+  amOrPm: 'AM' | 'PM';
+}
 
 @Injectable()
 export class HueAlarmService {
-  constructor(readonly requestService: HueRequestService) {}
+  private readonly logger = new Logger(HueAlarmService.name);
+
+  constructor(
+    readonly requestService: HueRequestService,
+    readonly envService: EnvService,
+  ) {}
 
   async getAlarms() {
     const response = await this.requestService.request(
       'resource/behavior_instance',
     );
-    return behaviorsSchema.parse(response);
+    return alarmSchema(this.envService.get('HUE_ALARM_ID')).parse(response);
+  }
+
+  setAlarmEnabled(enabled: boolean) {
+    return this.requestService.request(
+      `resource/behavior_instance/${this.envService.get('HUE_ALARM_ID')}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ enabled }),
+      },
+    );
+  }
+
+  setAlarmTrigger(time: AlarmTrigger) {
+    const newTimePoint: TimePoint = {
+      time: {
+        minute: time.minute,
+        hour: time.hour + time.amOrPm === 'AM' ? 0 : 12,
+      },
+      type: 'time',
+    };
+
+    return this.requestService.request(
+      `resource/behavior_instance/${this.envService.get('HUE_ALARM_ID')}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          configuration: {
+            ...baseAlarmConfiguration,
+            when: {
+              ...baseAlarmConfiguration.when,
+              time_point: newTimePoint,
+            },
+          },
+        }),
+      },
+    );
   }
 }
+
+const baseAlarmConfiguration = {
+  end_brightness: 100,
+  fade_in_duration: {
+    seconds: 300,
+  },
+  style: 'sunrise',
+  when: {
+    recurrence_days: [
+      'sunday',
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+      'saturday',
+    ],
+    time_point: {
+      time: {
+        hour: 7,
+        minute: 30,
+      },
+      type: 'time',
+    },
+  },
+  where: [
+    {
+      group: {
+        rid: 'ca6fff66-5b7c-4991-b6e3-b829211e750c',
+        rtype: 'room',
+      },
+    },
+  ],
+} as const;
+
+type TimePoint = {
+  time: {
+    hour: number;
+    minute: number;
+  };
+  type: 'time';
+};

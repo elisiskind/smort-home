@@ -5,7 +5,7 @@ const homeStateRoot = 'home-state';
 export const paths = {
   hue: {
     lights: `${homeStateRoot}/hue/lights`,
-    behaviors: `${homeStateRoot}/hue/behaviors`,
+    alarms: `${homeStateRoot}/hue/alarms`,
     rooms: `${homeStateRoot}/hue/rooms`,
   },
   sonos: {

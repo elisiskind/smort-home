@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { behaviorSchema, lightUpdateSchema } from '@smort-home/firestore';
+import { alarmUpdateSchema, lightUpdateSchema } from '@smort-home/firestore';
 
 const createEventSchema = <T extends string, D extends z.ZodTypeAny>(
   event: T,
@@ -31,12 +31,17 @@ export const hueLightEventSchema = createEventSchema(
   }),
 );
 
-export type HueLightEvent = z.infer<typeof hueLightEventSchema>['data'];
+export type LightEvent = z.infer<typeof hueLightEventSchema>['data'];
 
-export const hueBehaviorEventSchema = createEventSchema(
-  'hue.behavior',
-  z.any(),
+export const hueAlarmEventSchema = createEventSchema(
+  'hue.alarm',
+  z.object({
+    id: z.string(),
+    state: alarmUpdateSchema,
+  }),
 );
+
+export type AlarmEvent = z.infer<typeof hueAlarmEventSchema>['data'];
 
 export const antiBeanSprayEventSchema = createEventSchema(
   'antibean.spray',
@@ -46,7 +51,7 @@ export const antiBeanSprayEventSchema = createEventSchema(
 export const appEventSchema = z.discriminatedUnion('type', [
   sonosPlaybackEventSchema,
   hueLightEventSchema,
-  hueBehaviorEventSchema,
+  hueAlarmEventSchema,
   antiBeanSprayEventSchema,
 ]);
 

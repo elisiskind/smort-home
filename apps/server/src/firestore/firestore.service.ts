@@ -6,8 +6,9 @@ import {
   SonosDevice,
   SonosDeviceUpdate,
 } from '../sonos/sonos.service';
-import { Behavior, Light, paths, Room } from '@smort-home/firestore';
+import { HueAlarm, Light, paths, Room } from '@smort-home/firestore';
 import { HueLightUpdateEvent } from '../hue/schemas/hue.light.schema';
+import { HueAlarmUpdateEvent } from '../hue/schemas/hue.alarm.schema';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
@@ -23,10 +24,10 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async updateBehaviors(behaviors: Behavior[]) {
+  async updateAlarms(alarms: HueAlarm[]) {
     const batch = this.db.batch();
-    behaviors.forEach((behavior) => {
-      batch.set(this.behaviorsCollection().doc(behavior.id), behavior);
+    alarms.forEach((behavior) => {
+      batch.set(this.alarmsCollection().doc(behavior.id), behavior);
     });
     await batch.commit();
   }
@@ -39,7 +40,12 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async syncLight({ on, id, colorTemperature, dimming }: HueLightUpdateEvent) {
+  async syncHueLight({
+    on,
+    id,
+    colorTemperature,
+    dimming,
+  }: HueLightUpdateEvent) {
     const firestoreUpdate = {} as any;
 
     if (on !== null) {
@@ -57,6 +63,27 @@ export class FirestoreService {
     if (Object.keys(firestoreUpdate).length) {
       try {
         await this.lightsCollection().doc(id).update(firestoreUpdate);
+      } catch (e) {
+        this.logger.error('Failed to apply hue update: ', firestoreUpdate, e);
+      }
+    }
+  }
+
+  async syncHueAlarm({ id, enabled, name, when }: HueAlarmUpdateEvent) {
+    const firestoreUpdate = {} as any;
+
+    if (enabled !== null) {
+      firestoreUpdate.enabled = enabled;
+    }
+    if (name) {
+      firestoreUpdate.name = name;
+    }
+    if (when) {
+      firestoreUpdate.when = when;
+    }
+    if (Object.keys(firestoreUpdate).length) {
+      try {
+        await this.alarmsCollection().doc(id).update(firestoreUpdate);
       } catch (e) {
         this.logger.error('Failed to apply hue update: ', firestoreUpdate, e);
       }
@@ -89,8 +116,8 @@ export class FirestoreService {
     return this.db.collection(paths.hue.lights);
   }
 
-  private behaviorsCollection() {
-    return this.db.collection(paths.hue.behaviors);
+  private alarmsCollection() {
+    return this.db.collection(paths.hue.alarms);
   }
 
   private roomsCollection() {

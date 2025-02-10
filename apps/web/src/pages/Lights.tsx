@@ -1,6 +1,6 @@
 import { Box, Card, CircularProgress, Stack, useTheme } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
-import { useHueLights } from '../hooks/useHueLights';
+import { useHueLights } from '../events/hueLightEvents';
 import { LightCard } from '../components/molecules/LightCard';
 
 export const Lights = () => {

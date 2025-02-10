@@ -1,17 +1,23 @@
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import {
-  behaviorSchema,
-  HueLightEvent,
+  alarmSchema,
+  AlarmEvent,
+  HueAlarmUpdate,
+  LightEvent,
   lightSchema,
   paths,
   roomSchema,
 } from '@smort-home/firestore';
 import { DateTime } from 'luxon';
-import { useFirestoreCollection } from './useFirestoreCollection';
-import { errorResult, loadingResult, successResult } from './dataWrappingUtils';
+import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
+import {
+  errorResult,
+  loadingResult,
+  successResult,
+} from '../hooks/dataWrappingUtils';
 
-export const updateHueLight = async (data: HueLightEvent) => {
+export const updateHueLight = async (data: LightEvent) => {
   const eventDoc = doc(firestore, paths.events(), DateTime.now().toISOTime());
   await setDoc(eventDoc, {
     type: 'hue.light',
@@ -37,18 +43,4 @@ export const useHueLights = () => {
   } else {
     return loadingResult;
   }
-};
-
-export const useHueBehaviors = () => {
-  const result = useFirestoreCollection(paths.hue.behaviors, behaviorSchema);
-  const updateBehavior = async (data: any) => {
-    const eventDoc = doc(firestore, paths.events(), DateTime.now().toISOTime());
-    await setDoc(eventDoc, {
-      type: 'hue.behavior',
-      handled: false,
-      data,
-    });
-  };
-
-  return { result, updateBehavior };
 };

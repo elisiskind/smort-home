@@ -7,15 +7,16 @@ import {
   Typography,
 } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
-import { useHueBehaviors } from '../hooks/useHueLights';
+import { updateHueAlarm, useHueAlarms } from '../events/hueAlarmEvents';
+import { MobileTimePicker } from '../components/molecules/MobileTimePicker';
 
-export const Automations = () => {
-  const { updateBehavior, result } = useHueBehaviors();
+export const Alarms = () => {
+  const hueAlarmsQuery = useHueAlarms();
 
-  if (result.isSuccess) {
+  if (hueAlarmsQuery.isSuccess) {
     return (
       <Grid container spacing={2}>
-        {result.data.map((behavior) => (
+        {hueAlarmsQuery.data.map((behavior) => (
           <Grid xs={6} sm={4} key={behavior.id}>
             <Card>
               <Typography
@@ -34,9 +35,11 @@ export const Automations = () => {
                       },
                     }}
                     onChange={({ target: { checked: enabled } }) =>
-                      updateBehavior({
+                      updateHueAlarm({
                         id: behavior.id,
-                        state: { enabled },
+                        state: {
+                          enabled,
+                        },
                       })
                     }
                   />
@@ -44,14 +47,24 @@ export const Automations = () => {
               >
                 {behavior.name}
               </Typography>
-              <code>{JSON.stringify(behavior.when, null, 2)}</code>
+              <Box>
+                <MobileTimePicker
+                  time={behavior.when}
+                  onChange={(when) =>
+                    updateHueAlarm({
+                      id: behavior.id,
+                      state: { when },
+                    })
+                  }
+                />
+              </Box>
             </Card>
           </Grid>
         ))}
       </Grid>
     );
-  } else if (result.isError) {
-    return <Box>{result.error}</Box>;
+  } else if (hueAlarmsQuery.isError) {
+    return <Box>{hueAlarmsQuery.error}</Box>;
   } else {
     return <CircularProgress />;
   }

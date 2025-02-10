@@ -4,17 +4,9 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import {
-  HueLightUpdateEvent,
-  hueLightUpdateSchema,
-} from '../schemas/hue.light.schema';
 import EventSource from 'eventsource';
 import { z } from 'zod';
 import { EnvService } from '../../env/env.service';
-import {
-  HueButtonEvent,
-  hueButtonEventSchema,
-} from '../schemas/hue.button.schema';
 import { HueBridgeMetadata } from '../hue.bridge.factory';
 
 const baseHueEventSchema = z
@@ -56,6 +48,8 @@ export class HueEventsService implements OnModuleDestroy, OnModuleInit {
   onModuleInit() {
     const listener = (message: MessageEvent) => {
       const parsed = baseHueEventSchema.parse(JSON.parse(message.data));
+
+      console.log(parsed);
 
       parsed.forEach((event) => {
         const handlers = this.subscriptions[event.type] ?? [];

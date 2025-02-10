@@ -60,18 +60,26 @@ export const roomSchema = z.object({
 
 export type Room = z.infer<typeof roomSchema>;
 
-export const behaviorSchema = z.object({
+const whenSchema = z.object({
+  hour: z.number(),
+  minute: z.number(),
+  amOrPm: z.enum(['AM', 'PM']),
+});
+
+export type When = z.infer<typeof whenSchema>;
+
+export const alarmSchema = z.object({
   id: z.string(),
   name: z.string(),
-  when: z.object({
-    time: z.object({
-      hour: z.number(),
-      minute: z.number(),
-    }),
-    days: z.array(z.string()),
-    type: z.enum(['when', 'when_extended']),
-  }),
+  when: whenSchema,
   enabled: z.boolean(),
 });
 
-export type Behavior = z.infer<typeof behaviorSchema>;
+export type HueAlarm = z.infer<typeof alarmSchema>;
+
+export const alarmUpdateSchema = z.object({
+  when: whenSchema.optional(),
+  enabled: z.boolean().optional(),
+});
+
+export type HueAlarmUpdate = z.infer<typeof alarmSchema>;

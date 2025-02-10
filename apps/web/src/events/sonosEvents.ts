@@ -11,12 +11,3 @@ export const updatePlaybackState = async (data: SonosPlaybackEvent) => {
     data,
   });
 };
-
-export const playPhoebe = async () => {
-  const eventDoc = doc(firestore, paths.events(), DateTime.now().toISOTime());
-  await setDoc(eventDoc, {
-    type: 'sonos.phoebe',
-    handled: false,
-    data: { id: 'hello' },
-  });
-};

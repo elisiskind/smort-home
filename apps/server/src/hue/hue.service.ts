@@ -48,6 +48,7 @@ export class HueService {
 
   async handleHueAlarmEvent(event: AlarmEvent) {
     if (event.state.when) {
+      this.logger.debug('Alarm event: ', event);
       await this.alarmService.setAlarmTrigger(event.state.when);
     }
     if (event.state.enabled !== undefined) {
@@ -72,7 +73,6 @@ export class HueService {
   // events from hue bridge, not from the app
   handleAlarmEvents(onAlarmEvents: (event: HueAlarmUpdateEvent) => void) {
     this.eventService.subscribe('behavior_instance', (event) => {
-      this.logger.debug('Behavior', event);
       const parsed = hueAlarmEventSchema(
         this.envService.get('HUE_ALARM_ID'),
       ).parse(event);

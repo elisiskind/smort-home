@@ -17,7 +17,7 @@ export const Alarms = () => {
     return (
       <Grid container spacing={2}>
         {hueAlarmsQuery.data.map((behavior) => (
-          <Grid xs={6} sm={4} key={behavior.id}>
+          <Grid xs={12} sm={4} key={behavior.id}>
             <Card>
               <Typography
                 component="label"

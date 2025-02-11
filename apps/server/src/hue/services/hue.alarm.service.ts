@@ -39,7 +39,7 @@ export class HueAlarmService {
     const newTimePoint: TimePoint = {
       time: {
         minute: time.minute,
-        hour: time.hour + time.amOrPm === 'AM' ? 0 : 12,
+        hour: time.hour + (time.amOrPm === 'AM' ? 0 : 12),
       },
       type: 'time',
     };

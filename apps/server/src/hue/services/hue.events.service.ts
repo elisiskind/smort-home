@@ -49,8 +49,6 @@ export class HueEventsService implements OnModuleDestroy, OnModuleInit {
     const listener = (message: MessageEvent) => {
       const parsed = baseHueEventSchema.parse(JSON.parse(message.data));
 
-      console.log(parsed);
-
       parsed.forEach((event) => {
         const handlers = this.subscriptions[event.type] ?? [];
         handlers.forEach((onEvent) => onEvent(event));

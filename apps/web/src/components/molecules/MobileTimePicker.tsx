@@ -1,5 +1,6 @@
 import { When } from '@smort-home/firestore';
 import Picker from 'react-mobile-picker';
+import { useEagerServerState } from '../../hooks/useEagerServerState';
 
 interface MobileTimePickerProps {
   time: When;
@@ -10,9 +11,20 @@ const hours = [...Array(12).keys()];
 const minutes = [...Array(59).keys()];
 const amOrPm = ['AM', 'PM'] as const;
 
-export const MobileTimePicker = ({ time, onChange }: MobileTimePickerProps) => {
+export const MobileTimePicker = ({
+  time: serverTime,
+  onChange,
+}: MobileTimePickerProps) => {
+  const [value, setValue] = useEagerServerState(serverTime, onChange, 500);
+
   return (
-    <Picker value={time} onChange={onChange}>
+    <Picker
+      style={{
+        touchAction: 'none',
+      }}
+      value={value}
+      onChange={setValue}
+    >
       <Picker.Column name={'hour'}>
         {hours.map((option) => (
           <Picker.Item key={option} value={option}>

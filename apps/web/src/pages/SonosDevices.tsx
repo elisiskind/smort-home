@@ -1,6 +1,6 @@
 import { Box, CircularProgress } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
-import { sonosDeviceSchema } from '../api/schema';
+import { fsSonosDeviceSchema } from '../../../../lib/firestore/src/schemas/sonos.schema';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { SonosDeviceCard } from '../components/organisms/SonosDeviceCard';
 import { paths } from '@smort-home/firestore';
@@ -8,7 +8,7 @@ import { paths } from '@smort-home/firestore';
 export const SonosDevices = () => {
   const collection = useFirestoreCollection(
     paths.sonos.devices,
-    sonosDeviceSchema,
+    fsSonosDeviceSchema,
   );
 
   if (collection.isSuccess) {

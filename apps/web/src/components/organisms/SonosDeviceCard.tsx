@@ -1,11 +1,11 @@
 import { Box, Button, Card, Stack, Typography } from '@mui/joy';
 import { NowPlayingInfo } from '../molecules/NowPlayingInfo';
-import { SonosDevice } from '../../api/schema';
+import { FsSonosDevice } from '../../../../../lib/firestore/src/schemas/sonos.schema';
 import { MusicNote } from '../atoms/MusicNote';
 import { updatePlaybackState } from '../../events/sonosEvents';
 
 interface SonosDeviceCardProps {
-  device: SonosDevice;
+  device: FsSonosDevice;
 }
 
 export const SonosDeviceCard = ({ device }: SonosDeviceCardProps) => {

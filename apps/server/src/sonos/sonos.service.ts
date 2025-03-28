@@ -2,12 +2,13 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SonosManager } from '@svrooij/sonos/lib';
 import { Observable } from 'rxjs';
 import { ExtendedTransportState } from '@svrooij/sonos/lib/models';
-import { SonosPlaybackEvent } from '@smort-home/firestore';
+import { daysOfTheWeek, SonosPlaybackEvent } from '@smort-home/firestore';
+import { AlarmTrigger } from '../alarms/alarms.service';
 
 type PlayingState = 'PLAYING' | 'PAUSED' | 'TRANSITIONING' | 'STOPPED';
 
 export type SonosAlarm = {
-  recurrence: string;
+  trigger: AlarmTrigger;
   duration: string;
   id: string;
   enabled: boolean;
@@ -16,6 +17,11 @@ export type SonosAlarm = {
     art: string | null;
   };
 };
+
+export type SonosAlarmUpdate = Partial<
+  Pick<SonosAlarm, 'trigger' | 'enabled'>
+> &
+  Pick<SonosAlarm, 'id'>;
 
 export interface SonosDevice {
   id: string;
@@ -30,20 +36,6 @@ export interface SonosDevice {
 }
 
 export type SonosDeviceUpdate = Partial<SonosDevice> & Pick<SonosDevice, 'id'>;
-
-const normalizePlayingState = (state: ExtendedTransportState) => {
-  switch (state) {
-    case 'PLAYING':
-    case 'GROUP_PLAYING':
-      return 'PLAYING';
-    case 'TRANSITIONING':
-      return 'TRANSITIONING';
-    case 'PAUSED_PLAYBACK':
-      return 'PAUSED';
-    default:
-      return 'STOPPED';
-  }
-};
 
 @Injectable()
 export class SonosService implements OnModuleInit {
@@ -62,7 +54,7 @@ export class SonosService implements OnModuleInit {
         return {
           id: device.Uuid,
           name: device.Name,
-          state: normalizePlayingState(state.transportState),
+          state: this.normalizePlayingState(state.transportState),
           nowPlaying:
             track === undefined
               ? null
@@ -92,7 +84,10 @@ export class SonosService implements OnModuleInit {
       id: alarm.ID.toString(),
       enabled: alarm.Enabled,
       duration: alarm.Duration,
-      recurrence: alarm.Recurrence,
+      trigger: {
+        recurrence: this.parseRecurrence(alarm.Recurrence),
+        time: this.parseTime(alarm.StartLocalTime),
+      },
       music:
         typeof alarm.ProgramMetaData == 'string'
           ? {
@@ -112,7 +107,7 @@ export class SonosService implements OnModuleInit {
         device.Events.on('transportState', (state) => {
           subscriber.next({
             id: device.Uuid,
-            state: normalizePlayingState(state),
+            state: this.normalizePlayingState(state),
           });
         });
         device.Events.on('currentTrack', (track) => {
@@ -133,6 +128,18 @@ export class SonosService implements OnModuleInit {
     });
   }
 
+  listenForAlarmUpdates(): Observable<void> {
+    return new Observable((subscriber) =>
+      this.manager.Devices.forEach(async (device) =>
+        device.AlarmClockService.Events.addListener('serviceEvent', () =>
+          subscriber.next(),
+        ),
+      ),
+    );
+  }
+
+  async handleAlarmUpdateEvent(alarmUpdate: SonosAlarmUpdate) {}
+
   async handlePlaybackEvent(playbackEvent: SonosPlaybackEvent) {
     await Promise.all(
       this.manager.Devices.filter(
@@ -145,5 +152,44 @@ export class SonosService implements OnModuleInit {
         }
       }),
     );
+  }
+
+  private normalizePlayingState(state: ExtendedTransportState) {
+    switch (state) {
+      case 'PLAYING':
+      case 'GROUP_PLAYING':
+        return 'PLAYING';
+      case 'TRANSITIONING':
+        return 'TRANSITIONING';
+      case 'PAUSED_PLAYBACK':
+        return 'PAUSED';
+      default:
+        return 'STOPPED';
+    }
+  }
+
+  private parseRecurrence(recurrence: string): AlarmTrigger['recurrence'] {
+    if (recurrence === 'DAILY') {
+      return daysOfTheWeek;
+    } else if (recurrence.startsWith('ON_')) {
+      return recurrence
+        .substring(3)
+        .split('')
+        .map((digit) => (Number.parseInt(digit) + 6) % 7)
+        .map((index) => daysOfTheWeek[index]);
+    } else {
+      throw new Error('Invalid recurrence string');
+    }
+  }
+
+  private parseTime(time: string): AlarmTrigger['time'] {
+    const [hour, minute] = time
+      .split(':')
+      .map((numberString) => Number.parseInt(numberString));
+    return {
+      minute,
+      amOrPm: hour >= 12 ? 'pm' : 'am',
+      hour: ((hour + 11) % 12) + 1,
+    };
   }
 }

@@ -1,13 +1,13 @@
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import {
-  alarmSchema,
+  fsHueAlarmSchema,
   AlarmEvent,
-  HueAlarmUpdate,
+  FsHueAlarmUpdate,
   LightEvent,
-  lightSchema,
+  fsHueLightSchema,
   paths,
-  roomSchema,
+  fsHueRoomSchema,
 } from '@smort-home/firestore';
 import { DateTime } from 'luxon';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
@@ -27,8 +27,11 @@ export const updateHueLight = async (data: LightEvent) => {
 };
 
 export const useHueLights = () => {
-  const lightsResult = useFirestoreCollection(paths.hue.lights, lightSchema);
-  const roomsResult = useFirestoreCollection(paths.hue.rooms, roomSchema);
+  const lightsResult = useFirestoreCollection(
+    paths.hue.lights,
+    fsHueLightSchema,
+  );
+  const roomsResult = useFirestoreCollection(paths.hue.rooms, fsHueRoomSchema);
 
   if (lightsResult.isSuccess && roomsResult.isSuccess) {
     const data = roomsResult.data.map((room) => ({

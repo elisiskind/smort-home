@@ -16,10 +16,10 @@ import {
 import { updateHueLight } from '../../events/hueLightEvents';
 import { DebouncedSlider } from '../atoms/DebouncedSlider';
 import { ColorTemperatureSlider } from './ColorTemperatureSlider';
-import { Light } from '@smort-home/firestore';
+import { fsHueLight } from '@smort-home/firestore';
 
 interface LightCardProps {
-  light: Light;
+  light: fsHueLight;
 }
 
 const defaultColor = [255, 254, 218] as const;

@@ -1,8 +1,8 @@
 import { Box, Stack } from '@mui/joy';
-import { SonosDevice } from '../../api/schema';
+import { FsSonosDevice } from '../../../../../lib/firestore/src/schemas/sonos.schema';
 
 interface NowPlayingInfoProps {
-  nowPlaying: Omit<NonNullable<SonosDevice['nowPlaying']>, 'artUrl'>;
+  nowPlaying: Omit<NonNullable<FsSonosDevice['nowPlaying']>, 'artUrl'>;
 }
 
 export const NowPlayingInfo = ({ nowPlaying }: NowPlayingInfoProps) => {

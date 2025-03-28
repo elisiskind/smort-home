@@ -8,6 +8,7 @@ import { FirestoreModule } from './firestore/firestore.module';
 import { SonosModule } from './sonos/sonos.module';
 import { AppController } from './app.controller';
 import { ArduinoModule } from './arduino/arduino.module';
+import { AlarmsModule } from './alarms/alarms.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ArduinoModule } from './arduino/arduino.module';
     FirestoreModule,
     SonosModule,
     ArduinoModule,
+    AlarmsModule,
   ],
   providers: [AppService],
   controllers: [AppController],

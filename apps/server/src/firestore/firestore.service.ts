@@ -1,14 +1,24 @@
 import { Injectable, Logger, Scope } from '@nestjs/common';
 import { Firestore } from 'firebase-admin/firestore';
 
+import { SonosDevice, SonosDeviceUpdate } from '../sonos/sonos.service';
 import {
-  SonosAlarm,
-  SonosDevice,
-  SonosDeviceUpdate,
-} from '../sonos/sonos.service';
-import { HueAlarm, Light, paths, Room } from '@smort-home/firestore';
+  FsAlarm,
+  fsAlarmSchema,
+  FsHueAlarm,
+  fsHueAlarmSchema,
+  fsHueLight,
+  FsHueRoom,
+  FsSonosAlarm,
+  fsSonosAlarmSchema,
+  paths,
+} from '@smort-home/firestore';
 import { HueLightUpdateEvent } from '../hue/schemas/hue.light.schema';
 import { HueAlarmUpdateEvent } from '../hue/schemas/hue.alarm.schema';
+import { Observable } from 'rxjs';
+import { z } from 'zod';
+import { firestore } from 'firebase-admin';
+import CollectionReference = firestore.CollectionReference;
 
 @Injectable({ scope: Scope.DEFAULT })
 export class FirestoreService {
@@ -16,23 +26,23 @@ export class FirestoreService {
 
   constructor(private readonly db: Firestore) {}
 
-  async updateLights(lights: Light[]) {
+  async updateLights(lights: fsHueLight[]) {
     const batch = this.db.batch();
     lights.forEach((light) => {
-      batch.set(this.lightsCollection().doc(light.id), light);
+      batch.set(this.hueLightsCollection().doc(light.id), light);
     });
     await batch.commit();
   }
 
-  async updateAlarms(alarms: HueAlarm[]) {
+  async updateAlarms(alarms: FsHueAlarm[]) {
     const batch = this.db.batch();
     alarms.forEach((behavior) => {
-      batch.set(this.alarmsCollection().doc(behavior.id), behavior);
+      batch.set(this.hueAlarmsCollection().doc(behavior.id), behavior);
     });
     await batch.commit();
   }
 
-  async updateRooms(rooms: Room[]) {
+  async updateRooms(rooms: FsHueRoom[]) {
     const batch = this.db.batch();
     rooms.forEach((room) => {
       batch.set(this.roomsCollection().doc(room.id), room);
@@ -62,14 +72,14 @@ export class FirestoreService {
     }
     if (Object.keys(firestoreUpdate).length) {
       try {
-        await this.lightsCollection().doc(id).update(firestoreUpdate);
+        await this.hueLightsCollection().doc(id).update(firestoreUpdate);
       } catch (e) {
         this.logger.error('Failed to apply hue update: ', firestoreUpdate, e);
       }
     }
   }
 
-  async syncHueAlarm({ id, enabled, name, when }: HueAlarmUpdateEvent) {
+  async syncHueAlarm({ id, enabled, name, trigger }: HueAlarmUpdateEvent) {
     const firestoreUpdate = {} as any;
 
     if (enabled !== null) {
@@ -78,16 +88,29 @@ export class FirestoreService {
     if (name) {
       firestoreUpdate.name = name;
     }
-    if (when) {
-      firestoreUpdate.when = when;
+    if (trigger) {
+      firestoreUpdate.trigger = trigger;
     }
     if (Object.keys(firestoreUpdate).length) {
       try {
-        await this.alarmsCollection().doc(id).update(firestoreUpdate);
+        await this.hueAlarmsCollection().doc(id).update(firestoreUpdate);
       } catch (e) {
         this.logger.error('Failed to apply hue update: ', firestoreUpdate, e);
       }
     }
+  }
+
+  getHueAlarmSnapshot(): Observable<FsHueAlarm[]> {
+    return this.getSnapshot(this.hueAlarmsCollection(), fsHueAlarmSchema);
+  }
+
+  getSonosAlarmSnapshot(): Observable<FsSonosAlarm[]> {
+    return this.getSnapshot(this.sonosAlarmsCollection(), fsSonosAlarmSchema);
+  }
+
+  async getAlarms(): Promise<FsAlarm[]> {
+    const snapshot = await this.alarmsCollection().get();
+    return snapshot.docs.map((doc) => fsAlarmSchema.parse(doc.data()));
   }
 
   async syncSonosDevices(sonosDevices: SonosDevice[]) {
@@ -98,7 +121,7 @@ export class FirestoreService {
     await batch.commit();
   }
 
-  async syncSonosAlarms(sonosAlarms: SonosAlarm[]) {
+  async syncSonosAlarms(sonosAlarms: FsSonosAlarm[]) {
     const batch = this.db.batch();
     sonosAlarms.forEach((sonosAlarm) => {
       batch.set(this.sonosAlarmsCollection().doc(sonosAlarm.id), sonosAlarm);
@@ -112,12 +135,27 @@ export class FirestoreService {
       .update(sonosDeviceUpdate);
   }
 
-  private lightsCollection() {
+  private getSnapshot<SCHEMA extends z.ZodTypeAny>(
+    collectionReference: CollectionReference,
+    schema: SCHEMA,
+  ) {
+    return new Observable<z.infer<SCHEMA>[]>((subscriber) => {
+      collectionReference.onSnapshot((snapshot) => {
+        subscriber.next(snapshot.docs.map((doc) => schema.parse(doc.data())));
+      });
+    });
+  }
+
+  private hueLightsCollection() {
     return this.db.collection(paths.hue.lights);
   }
 
-  private alarmsCollection() {
+  private hueAlarmsCollection() {
     return this.db.collection(paths.hue.alarms);
+  }
+
+  private alarmsCollection() {
+    return this.db.collection(paths.alarms);
   }
 
   private roomsCollection() {

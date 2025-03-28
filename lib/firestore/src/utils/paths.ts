@@ -12,5 +12,6 @@ export const paths = {
     devices: `${homeStateRoot}/sonos/devices`,
     alarms: `${homeStateRoot}/sonos/alarms`,
   },
+  alarms: `${homeStateRoot}/app/alarms`,
   events: () => `events/${DateTime.now().toISODate()}/events`,
 };

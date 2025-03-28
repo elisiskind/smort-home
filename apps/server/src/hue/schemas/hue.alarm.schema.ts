@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { AlarmTrigger } from '../services/hue.alarm.service';
+import { daysOfTheWeek } from '@smort-home/firestore';
+import { AlarmTrigger } from '../../alarms/alarms.service';
 
 const behaviorSchema = z
   .object({
@@ -14,16 +15,6 @@ const behaviorSchema = z
     ...behavior,
     name: metadata.name,
   }));
-
-const daysOfTheWeek = [
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-  'sunday',
-] as const;
 
 const withRecurrenceDays = {
   recurrence_days: z.array(z.enum(daysOfTheWeek)),
@@ -46,9 +37,12 @@ const configurationSchema = z
   .transform(
     ({ when }) =>
       ({
-        amOrPm: when.time_point.time.hour >= 12 ? 'PM' : 'AM',
-        hour: ((when.time_point.time.hour + 11) % 12) + 1,
-        minute: when.time_point.time.minute,
+        time: {
+          amOrPm: when.time_point.time.hour >= 12 ? 'pm' : 'am',
+          hour: ((when.time_point.time.hour + 11) % 12) + 1,
+          minute: when.time_point.time.minute,
+        },
+        recurrence: when.recurrence_days,
       }) as const,
   );
 
@@ -62,7 +56,7 @@ export const alarmSchema = (alarmIds: string[]) =>
         .filter(({ id }) => alarmIds.includes(id))
         .map(({ configuration, ...data }) => ({
           ...data,
-          when: configurationSchema.parse(configuration),
+          trigger: configurationSchema.parse(configuration),
         }));
     });
 
@@ -86,7 +80,9 @@ export const hueAlarmEventSchema = (alarmIds: string[]) =>
           id,
           enabled: enabled ?? null,
           name: metadata ? metadata.name : null,
-          when: configuration ? configurationSchema.parse(configuration) : null,
+          trigger: configuration
+            ? configurationSchema.parse(configuration)
+            : null,
         } as const;
       } else {
         return {
@@ -99,6 +95,6 @@ export const hueAlarmEventSchema = (alarmIds: string[]) =>
 export type HueAlarmUpdateEvent = {
   id: string;
   enabled: boolean | null;
-  when: AlarmTrigger | null;
+  trigger: AlarmTrigger | null;
   name: string | null;
 };

@@ -1,11 +1,11 @@
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
-import { alarmSchema, AlarmEvent, paths } from '@smort-home/firestore';
+import { fsHueAlarmSchema, AlarmEvent, paths } from '@smort-home/firestore';
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
 import { DateTime } from 'luxon';
 
 export const useHueAlarms = () => {
-  return useFirestoreCollection(paths.hue.alarms, alarmSchema);
+  return useFirestoreCollection(paths.hue.alarms, fsHueAlarmSchema);
 };
 
 export const updateHueAlarm = async (data: AlarmEvent) => {

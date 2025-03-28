@@ -47,9 +47,8 @@ export class HueService {
   }
 
   async handleHueAlarmEvent(event: AlarmEvent) {
-    if (event.state.when) {
-      this.logger.debug('Alarm event: ', event);
-      await this.alarmService.setAlarmTrigger(event.state.when);
+    if (event.state.trigger) {
+      await this.alarmService.setAlarmTrigger(event.state.trigger);
     }
     if (event.state.enabled !== undefined) {
       await this.alarmService.setAlarmEnabled(event.state.enabled);

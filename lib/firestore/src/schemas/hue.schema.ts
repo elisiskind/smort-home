@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { alarmTriggerSchema, daysOfTheWeek } from './alarm.schema';
 
 const colorTemperatureSchema = z.object({
   value: z.number().nullable(),
@@ -17,7 +18,7 @@ const dimmingSchema = z.object({
   minDimLevel: z.number().nullable(),
 });
 
-export const lightSchema = z
+export const fsHueLightSchema = z
   .object({
     type: z.literal('light'),
     id: z.string(),
@@ -29,9 +30,9 @@ export const lightSchema = z
   })
   .readonly();
 
-export type Light = z.infer<typeof lightSchema>;
+export type fsHueLight = z.infer<typeof fsHueLightSchema>;
 
-export const lightUpdateSchema = z
+export const fsHueLightUpdateSchema = z
   .object({
     on: z.boolean().optional(),
     dimming: dimmingSchema.pick({ brightness: true }).readonly().optional(),
@@ -42,9 +43,9 @@ export const lightUpdateSchema = z
   })
   .readonly();
 
-export type LightUpdate = z.infer<typeof lightUpdateSchema>;
+export type FsHueLightUpdate = z.infer<typeof fsHueLightUpdateSchema>;
 
-export const roomSchema = z.object({
+export const fsHueRoomSchema = z.object({
   id: z.string(),
   lights: z.array(z.string()),
   name: z.string(),
@@ -58,28 +59,20 @@ export const roomSchema = z.object({
     .nullable(),
 });
 
-export type Room = z.infer<typeof roomSchema>;
+export type FsHueRoom = z.infer<typeof fsHueRoomSchema>;
 
-const whenSchema = z.object({
-  hour: z.number(),
-  minute: z.number(),
-  amOrPm: z.enum(['AM', 'PM']),
-});
-
-export type When = z.infer<typeof whenSchema>;
-
-export const alarmSchema = z.object({
+export const fsHueAlarmSchema = z.object({
   id: z.string(),
   name: z.string(),
-  when: whenSchema,
+  trigger: alarmTriggerSchema,
   enabled: z.boolean(),
 });
 
-export type HueAlarm = z.infer<typeof alarmSchema>;
+export type FsHueAlarm = z.infer<typeof fsHueAlarmSchema>;
 
-export const alarmUpdateSchema = z.object({
-  when: whenSchema.optional(),
+export const fsHueAlarmUpdateSchema = z.object({
+  trigger: alarmTriggerSchema.optional(),
   enabled: z.boolean().optional(),
 });
 
-export type HueAlarmUpdate = z.infer<typeof alarmSchema>;
+export type FsHueAlarmUpdate = z.infer<typeof fsHueAlarmSchema>;

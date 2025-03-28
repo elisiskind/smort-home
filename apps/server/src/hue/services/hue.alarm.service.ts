@@ -2,12 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { alarmSchema } from '../schemas/hue.alarm.schema';
 import { HueRequestService } from './hue.request.service';
 import { EnvService } from '../../env/env.service';
-
-export interface AlarmTrigger {
-  minute: number;
-  hour: number;
-  amOrPm: 'AM' | 'PM';
-}
+import { AlarmTrigger } from '../../alarms/alarms.service';
 
 @Injectable()
 export class HueAlarmService {
@@ -35,11 +30,11 @@ export class HueAlarmService {
     );
   }
 
-  setAlarmTrigger(time: AlarmTrigger) {
+  setAlarmTrigger(trigger: AlarmTrigger) {
     const newTimePoint: TimePoint = {
       time: {
-        minute: time.minute,
-        hour: time.hour + (time.amOrPm === 'AM' ? 0 : 12),
+        minute: trigger.time.minute,
+        hour: trigger.time.hour + (trigger.time.amOrPm === 'am' ? 0 : 12),
       },
       type: 'time',
     };
@@ -54,6 +49,7 @@ export class HueAlarmService {
             when: {
               ...baseAlarmConfiguration.when,
               time_point: newTimePoint,
+              recurrence_days: trigger.recurrence,
             },
           },
         }),

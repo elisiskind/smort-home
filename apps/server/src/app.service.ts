@@ -74,6 +74,14 @@ export class AppService implements OnModuleInit {
     this.sonosService.listenForUpdates().subscribe((update) => {
       this.firestoreService.syncSonosDevice(update);
     });
+
+    this.sonosService
+      .listenForAlarmUpdates()
+      .subscribe(() =>
+        this.sonosService
+          .getAlarms()
+          .then((alarms) => this.firestoreService.syncSonosAlarms(alarms)),
+      );
   }
 
   private readonly onEvent = async (event: AppEvent) => {

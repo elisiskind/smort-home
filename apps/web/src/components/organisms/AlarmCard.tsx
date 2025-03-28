@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Card,
   Modal,
@@ -10,15 +11,14 @@ import {
   switchClasses,
   Typography,
 } from '@mui/joy';
-import { HueAlarm } from '@smort-home/firestore';
+import { daysOfTheWeek, FsHueAlarm } from '@smort-home/firestore';
 import { updateHueAlarm } from '../../events/hueAlarmEvents';
 import { useState } from 'react';
 import { MobileTimePicker } from '../molecules/MobileTimePicker';
 import { AmPmChip } from '../atoms/AmPmChip';
-import { useEagerServerState } from '../../hooks/useEagerServerState';
 
 interface AlarmCardProps {
-  alarm: HueAlarm;
+  alarm: FsHueAlarm;
 }
 
 export const AlarmCard = ({ alarm }: AlarmCardProps) => {
@@ -32,13 +32,11 @@ export const AlarmCard = ({ alarm }: AlarmCardProps) => {
           <Typography>Select time</Typography>
           <MobileTimePicker
             close={() => setShowEditModal(false)}
-            time={alarm.when}
-            onChange={(when) =>
+            trigger={alarm.trigger}
+            onChange={(trigger) =>
               updateHueAlarm({
                 id: alarm.id,
-                state: {
-                  when,
-                },
+                state: { trigger },
               })
             }
           />
@@ -78,29 +76,56 @@ export const AlarmCard = ({ alarm }: AlarmCardProps) => {
         >
           {alarm.name}
         </Typography>
-        <Sheet
-          variant={'soft'}
-          sx={{
-            '& .MuiTypography-root': {
-              color: alarm.enabled ? undefined : 'neutral.400',
-              transition: 'color 0.1s ease-in-out',
-            },
-          }}
-        >
-          <Stack
-            direction={'row'}
-            alignItems={'center'}
-            justifyContent={'space-evenly'}
+        <Box display={'flex'} justifyContent={'center'}>
+          <Sheet
+            variant={'soft'}
+            sx={{
+              maxWidth: '300px',
+              flex: 1,
+              '& .MuiTypography-root': {
+                color: alarm.enabled ? undefined : 'neutral.400',
+                transition: 'color 0.1s ease-in-out',
+              },
+            }}
           >
-            <Typography sx={{ fontFamily: 'share tech mono', fontSize: 48 }}>
-              {`${alarm.when.hour.toString().padStart(2, '0')}:${alarm.when.minute.toString().padStart(2, '0')}`}
-            </Typography>
-            <Stack>
-              <AmPmChip selected={alarm.when.amOrPm === 'AM'}>AM</AmPmChip>
-              <AmPmChip selected={alarm.when.amOrPm === 'PM'}>PM</AmPmChip>
+            <Stack
+              direction={'row'}
+              alignItems={'center'}
+              justifyContent={'space-evenly'}
+            >
+              <Typography sx={{ fontFamily: 'share tech mono', fontSize: 48 }}>
+                {`${alarm.trigger.time.hour.toString().padStart(2, '0')}:${alarm.trigger.time.minute.toString().padStart(2, '0')}`}
+              </Typography>
+              <Stack>
+                <AmPmChip selected={alarm.trigger.time.amOrPm === 'am'}>
+                  AM
+                </AmPmChip>
+                <AmPmChip selected={alarm.trigger.time.amOrPm === 'pm'}>
+                  PM
+                </AmPmChip>
+              </Stack>
             </Stack>
-          </Stack>
-        </Sheet>
+            <Box p={1}>
+              <Stack direction={'row'} gap={0.5} mt={-1}>
+                {daysOfTheWeek.map((day) => (
+                  <Box
+                    sx={{
+                      flex: 1,
+                      bgcolor: `neutral.${alarm.trigger.recurrence.includes(day) ? 300 : 100}`,
+                      color: `neutral.${alarm.trigger.recurrence.includes(day) ? 700 : 400}`,
+                      borderRadius: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {day.substring(0, 1).toUpperCase()}
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          </Sheet>
+        </Box>
         <Button
           variant={'soft'}
           color={'neutral'}

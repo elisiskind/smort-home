@@ -7,7 +7,7 @@ export const gradientStops = [
   [100, [255, 213, 146]] as const,
 ] as const;
 
-export const calculateColor = (
+export const getRgbValueFromPercentageFactor = (
   factor: number,
 ): readonly [number, number, number] => {
   const exactMatch = gradientStops.find(([stop]) => stop === factor);
@@ -34,11 +34,20 @@ export const gradientBg =
     .join(', ') +
   ')';
 
-export const adjustValue = ({
+export const convertMirekValueToPercentage = ({
   schema: { min, max },
   value,
-}: ColorTemperature) => ((value - min) / (max - min)) * 100;
-export const reverseAdjustValue = (
+}: ValidColorTemperature) => ((value - min) / (max - min)) * 100;
+
+export const convertPercentageToMirekValue = (
   adjustedColorValue: number,
   { min, max }: ColorTemperature['schema'],
 ) => Math.round((adjustedColorValue / 100) * (max - min) + min);
+
+export type ValidColorTemperature = { value: number } & ColorTemperature;
+
+export const isValidColorTemperature = (
+  colorTemperature: ColorTemperature | null,
+): colorTemperature is ValidColorTemperature => {
+  return !!colorTemperature?.value;
+};

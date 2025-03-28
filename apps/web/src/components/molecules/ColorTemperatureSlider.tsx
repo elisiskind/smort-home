@@ -1,16 +1,16 @@
 import { DebouncedSlider } from '../atoms/DebouncedSlider';
 import { updateHueLight } from '../../events/hueLightEvents';
-import { ColorTemperature } from '@smort-home/firestore';
 import { useTheme } from '@mui/joy';
 import {
-  adjustValue,
-  calculateColor,
+  convertMirekValueToPercentage,
+  getRgbValueFromPercentageFactor,
   gradientBg,
-  reverseAdjustValue,
+  convertPercentageToMirekValue,
+  ValidColorTemperature,
 } from '../atoms/colorTemperatureUtils';
 
 interface ColorTemperatureSliderProps {
-  colorTemperature: ColorTemperature;
+  colorTemperature: ValidColorTemperature;
   id: string;
 }
 
@@ -20,7 +20,7 @@ export const ColorTemperatureSlider = ({
 }: ColorTemperatureSliderProps) => {
   const theme = useTheme();
 
-  const adjustedValue = adjustValue(colorTemperature);
+  const adjustedValue = convertMirekValueToPercentage(colorTemperature);
 
   return (
     <DebouncedSlider
@@ -33,7 +33,7 @@ export const ColorTemperatureSlider = ({
           visibility: 'hidden',
         },
         '.MuiSlider-thumb': {
-          background: `rgb(${calculateColor(adjustedValue).join(', ')})`,
+          background: `rgb(${getRgbValueFromPercentageFactor(adjustedValue).join(', ')})`,
           transition: 'background 0.2s ease-in-out',
         },
       }}
@@ -43,7 +43,10 @@ export const ColorTemperatureSlider = ({
           id,
           state: {
             colorTemperature: {
-              value: reverseAdjustValue(newValue, colorTemperature.schema),
+              value: convertPercentageToMirekValue(
+                newValue,
+                colorTemperature.schema,
+              ),
             },
           },
         })

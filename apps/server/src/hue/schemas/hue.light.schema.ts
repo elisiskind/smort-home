@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const colorTemperatureBaseSchema = z.object({
-  mirek: z.number(),
+  mirek: z.number().nullable(),
   mirek_valid: z.boolean().optional(),
   mirek_schema: z.object({
     mirek_minimum: z.number(),
@@ -101,7 +101,7 @@ export type HueLightUpdateEvent = {
   on: boolean | null;
   dimming: { brightness: number } | null;
   colorTemperature: {
-    value: number;
+    value: number | null;
     valid: boolean | null;
   } | null;
 };

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const colorTemperatureSchema = z.object({
-  value: z.number(),
+  value: z.number().nullable(),
   schema: z
     .object({
       min: z.number(),

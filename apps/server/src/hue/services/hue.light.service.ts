@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { HueLightUpdate, lightsSchema } from '../schemas/hue.light.schema';
 import { HueRequestService } from './hue.request.service';
 import { LightUpdate } from '@smort-home/firestore';
@@ -17,7 +17,7 @@ const transformLightUpdate = (
 
 @Injectable()
 export class HueLightService {
-  constructor(readonly requestService: HueRequestService) {}
+  constructor(private readonly requestService: HueRequestService) {}
 
   async getLights() {
     const response = await this.requestService.request('resource/light');

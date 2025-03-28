@@ -11,7 +11,7 @@ export class HueRequestService {
 
   constructor(
     @Inject('HUE_BRIDGE_METADATA') hueBridgeMetadata: HueBridgeMetadata,
-    readonly envService: EnvService,
+    private readonly envService: EnvService,
   ) {
     (process.env['NODE_TLS_REJECT_UNAUTHORIZED'] as any) = 0;
     this.baseUrl = `${hueBridgeMetadata.ip}:${hueBridgeMetadata.port}/clip/v2`;

@@ -1,7 +1,8 @@
 import {
-  adjustValue,
-  calculateColor,
+  convertMirekValueToPercentage,
+  getRgbValueFromPercentageFactor,
   formatAsRgba,
+  isValidColorTemperature,
 } from '../atoms/colorTemperatureUtils';
 import {
   Box,
@@ -77,8 +78,10 @@ export const LightCard = ({ light }: LightCardProps) => {
         sx={{
           transition: 'background-color 0.3s ease-in-out',
           backgroundColor: formatAsRgba(
-            light.colorTemperature
-              ? calculateColor(adjustValue(light.colorTemperature))
+            isValidColorTemperature(light.colorTemperature)
+              ? getRgbValueFromPercentageFactor(
+                  convertMirekValueToPercentage(light.colorTemperature),
+                )
               : defaultColor,
             light.on ? (light.dimming ? light.dimming.brightness / 100 : 1) : 0,
           ),
@@ -100,7 +103,7 @@ export const LightCard = ({ light }: LightCardProps) => {
             }
           />
         )}
-        {light.colorTemperature && (
+        {isValidColorTemperature(light.colorTemperature) && (
           <ColorTemperatureSlider
             colorTemperature={light.colorTemperature}
             id={light.id}

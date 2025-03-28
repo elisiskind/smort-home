@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { AlarmEvent, LightEvent } from '@smort-home/firestore';
 import { HueAlarmService } from './services/hue.alarm.service';
 import { HueEventsService } from './services/hue.events.service';

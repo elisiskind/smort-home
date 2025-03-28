@@ -14,6 +14,8 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@fontsource/share-tech-mono": "^5.1.1",
+    "@fontsource/space-mono": "^5.1.2",
     "@mui/joy": "5.0.0-beta.48",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.3.0",

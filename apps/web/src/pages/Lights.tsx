@@ -1,4 +1,4 @@
-import { Box, Card, CircularProgress, Stack, useTheme } from '@mui/joy';
+import { Box, Card, CircularProgress, Sheet, Stack, useTheme } from '@mui/joy';
 import Grid from '@mui/joy/Grid';
 import { useHueLights } from '../events/hueLightEvents';
 import { LightCard } from '../components/molecules/LightCard';
@@ -10,7 +10,7 @@ export const Lights = () => {
     return (
       <Stack spacing={2}>
         {result.data.map(({ room, lights }) => (
-          <Card key={room.id} sx={{}}>
+          <Card variant={'soft'} key={room.id}>
             <Box>{room.name}</Box>
             <Grid container spacing={2}>
               {lights.map((light) => (

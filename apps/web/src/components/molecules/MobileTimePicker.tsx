@@ -1,51 +1,76 @@
 import { When } from '@smort-home/firestore';
 import Picker from 'react-mobile-picker';
-import { useEagerServerState } from '../../hooks/useEagerServerState';
+import { useState } from 'react';
+import { Box, Button, Stack } from '@mui/joy';
 
 interface MobileTimePickerProps {
   time: When;
   onChange: (when: When) => void;
+  close: () => void;
 }
 
-const hours = [...Array(12).keys()];
-const minutes = [...Array(59).keys()];
+const hours = [...Array(12).keys()].map((key) => key + 1);
+const minutes = [...Array(60).keys()];
 const amOrPm = ['AM', 'PM'] as const;
 
 export const MobileTimePicker = ({
-  time: serverTime,
+  time: initialTime,
   onChange,
+  close,
 }: MobileTimePickerProps) => {
-  const [value, setValue] = useEagerServerState(serverTime, onChange, 500);
+  const [time, setTime] = useState(initialTime);
+
+  const changed =
+    time.amOrPm !== initialTime.amOrPm ||
+    time.hour !== initialTime.hour ||
+    time.minute !== initialTime.minute;
 
   return (
-    <Picker
-      style={{
-        touchAction: 'none',
-      }}
-      value={value}
-      onChange={setValue}
-    >
-      <Picker.Column name={'hour'}>
-        {hours.map((option) => (
-          <Picker.Item key={option} value={option}>
-            {`${option}`.padStart(2, '0')}
-          </Picker.Item>
-        ))}
-      </Picker.Column>
-      <Picker.Column name={'minute'}>
-        {minutes.map((option) => (
-          <Picker.Item key={option} value={option}>
-            {`${option}`.padStart(2, '0')}
-          </Picker.Item>
-        ))}
-      </Picker.Column>
-      <Picker.Column name={'amOrPm'}>
-        {amOrPm.map((option) => (
-          <Picker.Item key={option} value={option}>
-            {option}
-          </Picker.Item>
-        ))}
-      </Picker.Column>
-    </Picker>
+    <Box>
+      <Picker
+        wheelMode={'normal'}
+        style={{
+          touchAction: 'none',
+        }}
+        value={time}
+        onChange={setTime}
+      >
+        <Picker.Column name={'hour'}>
+          {hours.map((option) => (
+            <Picker.Item key={option} value={option}>
+              {`${option}`.padStart(2, '0')}
+            </Picker.Item>
+          ))}
+        </Picker.Column>
+        <Picker.Column name={'minute'}>
+          {minutes.map((option) => (
+            <Picker.Item key={option} value={option}>
+              {`${option}`.padStart(2, '0')}
+            </Picker.Item>
+          ))}
+        </Picker.Column>
+        <Picker.Column name={'amOrPm'}>
+          {amOrPm.map((option) => (
+            <Picker.Item key={option} value={option}>
+              {option}
+            </Picker.Item>
+          ))}
+        </Picker.Column>
+      </Picker>
+      <Stack direction={'row'} justifyContent={'flex-end'} gap={1}>
+        <Button variant={'plain'} onClick={close}>
+          Cancel
+        </Button>
+        <Button
+          disabled={!changed}
+          onClick={() => {
+            onChange(time);
+            close();
+          }}
+        >
+          Save
+        </Button>
+      </Stack>
+    </Box>
   );
 };

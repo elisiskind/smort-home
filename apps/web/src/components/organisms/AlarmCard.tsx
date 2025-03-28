@@ -15,6 +15,7 @@ import { updateHueAlarm } from '../../events/hueAlarmEvents';
 import { useState } from 'react';
 import { MobileTimePicker } from '../molecules/MobileTimePicker';
 import { AmPmChip } from '../atoms/AmPmChip';
+import { useEagerServerState } from '../../hooks/useEagerServerState';
 
 interface AlarmCardProps {
   alarm: HueAlarm;
@@ -22,7 +23,6 @@ interface AlarmCardProps {
 
 export const AlarmCard = ({ alarm }: AlarmCardProps) => {
   const [showEditModal, setShowEditModal] = useState(false);
-  const [enabled, setEnabled] = useState(false);
 
   return (
     <>
@@ -55,25 +55,23 @@ export const AlarmCard = ({ alarm }: AlarmCardProps) => {
           endDecorator={
             <Switch
               variant={'solid'}
-              color={'neutral'}
-              // checked={alarm.enabled}
-              checked={enabled}
+              color={alarm.enabled ? 'primary' : 'neutral'}
+              checked={alarm.enabled}
               sx={{
                 [`& .${switchClasses.thumb}`]: {
                   transition: 'left 0.2s ease-in-out',
                 },
                 [`& .${switchClasses.track}`]: {
-                  background: enabled ? 'neutral.800' : 'neutral.200',
+                  bgcolor: alarm.enabled ? undefined : 'neutral.400',
                 },
               }}
-              onChange={
-                ({ target: { checked: enabled } }) => setEnabled(enabled)
-                // updateHueAlarm({
-                //   id: alarm.id,
-                //   state: {
-                //     enabled,
-                //   },
-                // })
+              onChange={({ target: { checked: enabled } }) =>
+                updateHueAlarm({
+                  id: alarm.id,
+                  state: {
+                    enabled,
+                  },
+                })
               }
             />
           }
@@ -83,8 +81,8 @@ export const AlarmCard = ({ alarm }: AlarmCardProps) => {
         <Sheet
           variant={'soft'}
           sx={{
-            '& *': {
-              color: enabled ? 'neutral.800' : 'neutral.300',
+            '& .MuiTypography-root': {
+              color: alarm.enabled ? undefined : 'neutral.400',
               transition: 'color 0.1s ease-in-out',
             },
           }}
